@@ -290,7 +290,15 @@ A glowing animated globe highlighting tournament host cities.
 
 <p align="center">
 
-<img src="assets/3d-demo.gif" width="100%" />
+<img src="assets/3d-demo.gif" width="100%" alt="Living Stadium OS 3D Demo"/>
+
+</p>
+
+<p align="center">
+
+### ⚽ Explore the Future of Smart Stadiums
+
+🌍 Digital Twin • 🏟️ 3D Stadium • 🤖 AI Assistant • ⚽ Interactive Football • 🏆 Trophy Experience
 
 </p>
 
