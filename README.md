@@ -70,9 +70,17 @@ Goal celebrations transform the entire interface.
 
 <p align="center">
 
-<img src="assets/hero.gif" width="100%"/>
+<img width="150" src="assets/trophy.gif"/>
+
+<img width="150" src="assets/football.gif"/>
 
 </p>
+
+<h1 align="center">
+
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=28&pause=1200&color=00E6FF&center=true&vCenter=true&width=900&lines=Welcome+to+Living+Stadium+OS;Where+AI+Meets+Football;Built+for+FIFA+World+Cup+2026"/>
+
+</h1>
 
 ---
 
