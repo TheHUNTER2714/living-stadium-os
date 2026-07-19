@@ -141,7 +141,6 @@ Instead the interface continuously evolves.
 ---
 
 # 🏟️ Immersive 3D Experience
-# 🏟️ Immersive 3D Experience
 
 <p align="center">
 
