@@ -141,12 +141,181 @@ Instead the interface continuously evolves.
 ---
 
 # 🏟️ Immersive 3D Experience
+# 🏟️ Immersive 3D Experience
 
 <p align="center">
 
-<img src="assets/stadium.gif" width="95%"/>
+<img src="assets/3d-stadium.gif" width="95%" alt="3D Stadium"/>
 
 </p>
+
+<p align="center">
+
+### 🌍 Experience the Stadium Like Never Before
+
+*A cinematic, AI-powered digital twin built for the FIFA World Cup 2026.*
+
+</p>
+
+---
+
+## 🌟 Interactive 3D World
+
+<table align="center">
+<tr>
+
+<td align="center" width="25%">
+
+<img src="assets/football.gif" width="120"/>
+
+### ⚽
+
+**Rotating Football**
+
+Physically rendered football with realistic reflections.
+
+</td>
+
+<td align="center" width="25%">
+
+<img src="assets/trophy.gif" width="120"/>
+
+### 🏆
+
+**Championship Trophy**
+
+A premium rotating trophy inspired by the world's biggest football tournament.
+
+</td>
+
+<td align="center" width="25%">
+
+<img src="assets/stadium.gif" width="120"/>
+
+### 🏟️
+
+**Digital Stadium**
+
+A complete AI-powered stadium digital twin.
+
+</td>
+
+<td align="center" width="25%">
+
+<img src="assets/world.gif" width="120"/>
+
+### 🌍
+
+**Living Earth**
+
+A glowing animated globe highlighting tournament host cities.
+
+</td>
+
+</tr>
+</table>
+
+---
+
+# ✨ 3D Visual Features
+
+🚀 Cinematic Camera Fly-through
+
+⚽ Interactive Rotating Football
+
+🏟️ Complete Stadium Digital Twin
+
+💎 Glassmorphism UI
+
+🌌 Animated Space Background
+
+🌍 Rotating Earth
+
+✨ AI Particle Universe
+
+🌠 Dynamic Stadium Lighting
+
+🎇 Goal Celebration Effects
+
+🛰️ Floating Holographic Panels
+
+🎆 Crowd Light Animations
+
+🌊 Neon Reflections
+
+🎥 Smooth Camera Transitions
+
+---
+
+# 🎬 Cinematic Animation Flow
+
+```text
+🌍 Earth Appears
+
+        ↓
+
+⚽ Football Spins
+
+        ↓
+
+🏟️ Stadium Emerges
+
+        ↓
+
+💡 Floodlights Turn On
+
+        ↓
+
+🚁 AI Drones Fly
+
+        ↓
+
+🛰️ Holograms Activate
+
+        ↓
+
+✨ Particle Explosion
+
+        ↓
+
+🤖 AI Interface Appears
+
+        ↓
+
+🎉 Goal Celebration
+```
+
+---
+
+# 🎥 3D Demo
+
+<p align="center">
+
+<img src="assets/3d-demo.gif" width="100%" />
+
+</p>
+
+---
+
+## ⚙️ Built Using
+
+<p align="center">
+
+<img src="https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js"/>
+
+<img src="https://img.shields.io/badge/React%20Three%20Fiber-black?style=for-the-badge"/>
+
+<img src="https://img.shields.io/badge/Drei-444444?style=for-the-badge"/>
+
+<img src="https://img.shields.io/badge/GSAP-88CE02?style=for-the-badge"/>
+
+<img src="https://img.shields.io/badge/Framer%20Motion-ff4ecd?style=for-the-badge"/>
+
+</p>
+
+---
+
+> **"Every interaction is designed to feel like stepping into the control room of a futuristic FIFA World Cup stadium."**
 
 ### Includes
 
