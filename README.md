@@ -1,418 +1,387 @@
-# ⚽ Living Stadium OS
+<p align="center">
 
-### *The Future of Intelligent Stadiums for FIFA World Cup 2026*
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=320&color=gradient&customColorList=12,20,24,26,30&text=⚽%20Living%20Stadium%20OS&fontColor=ffffff&fontSize=52&fontAlignY=38&desc=GenAI%20Powered%20Smart%20Stadium%20Experience%20for%20FIFA%20World%20Cup%202026&descAlignY=60&animation=fadeIn"/>
+
+</p>
+
+<h1 align="center">
+
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=30&duration=3000&pause=1000&color=00F5FF&center=true&vCenter=true&width=1000&lines=⚽+Welcome+to+Living+Stadium+OS;🏟️+The+Future+of+Smart+Stadiums;🤖+Powered+by+Generative+AI;🌍+Built+for+FIFA+World+Cup+2026;🚀+3D+Immersive+Experience;🎯+Real-Time+Operational+Intelligence;✨+Designed+to+Amaze+Every+Fan"/>
+
+</h1>
 
 <p align="center">
 
-🚀 **AI • 3D • Real-Time Intelligence • Immersive Experience • Generative AI**
+<img src="https://komarev.com/ghpvc/?username=TheHUNTER2714&label=Visitors&color=00c3ff&style=for-the-badge"/>
 
-*"Where Every Stadium Comes Alive."*
+<img src="https://img.shields.io/github/stars/TheHUNTER2714/living-stadium-os?style=for-the-badge"/>
+
+<img src="https://img.shields.io/github/forks/TheHUNTER2714/living-stadium-os?style=for-the-badge"/>
+
+<img src="https://img.shields.io/github/license/TheHUNTER2714/living-stadium-os?style=for-the-badge"/>
+
+</p>
+
+<p align="center">
+
+<img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react"/>
+
+<img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript"/>
+
+<img src="https://img.shields.io/badge/Tailwind-06B6D4?style=for-the-badge&logo=tailwind-css"/>
+
+<img src="https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js"/>
+
+<img src="https://img.shields.io/badge/Framer_Motion-ff4ecd?style=for-the-badge"/>
+
+<img src="https://img.shields.io/badge/GSAP-88CE02?style=for-the-badge"/>
+
+<img src="https://img.shields.io/badge/Generative_AI-purple?style=for-the-badge"/>
+
+<img src="https://img.shields.io/badge/FIFA_2026-Inspired-blue?style=for-the-badge"/>
 
 </p>
 
 ---
 
-## 🌍 Overview
+# ⚽ Welcome to the Future of Stadium Intelligence
 
-**Living Stadium OS** is a **next-generation GenAI-powered Smart Stadium Operating System** built for the **FIFA World Cup 2026**. It combines **Artificial Intelligence, immersive 3D experiences, cinematic animations, predictive analytics, and real-time operational intelligence** to transform every stadium into a living digital ecosystem.
+Imagine entering a FIFA World Cup stadium where every interaction is intelligent.
 
-Unlike traditional event applications, Living Stadium OS acts as a **personal AI companion for fans** and a **real-time command center for organizers**, providing intelligent navigation, multilingual communication, accessibility, crowd prediction, transport optimization, sustainability monitoring, and operational insights—all through an immersive futuristic interface.
+The lights automatically illuminate.
 
----
+A giant holographic stadium appears.
 
-# ✨ Experience Begins Before the Match
+The AI welcomes you in your own language.
 
-The moment users launch the application, they don't simply open an app—they enter the **Living Stadium**.
+The football rotates in stunning 3D.
 
-The screen fades from complete darkness.
+Navigation updates in real time.
 
-Powerful stadium floodlights illuminate one after another.
+Crowds are predicted before congestion happens.
 
-A glowing football rotates through space.
+Goal celebrations transform the entire interface.
 
-Thousands of particles assemble into the **Living Stadium OS** logo.
-
-Digital drones fly across the sky creating holographic light trails.
-
-Massive crowd chants begin.
-
-The stadium roof slowly opens.
-
-The camera flies through the entire 3D stadium before transitioning into the futuristic AI dashboard with cinematic motion.
-
-Every page feels like entering the operating system of a FIFA control room.
+**Living Stadium OS** combines **Generative AI**, **immersive 3D graphics**, **predictive intelligence**, and **real-time operational analytics** to create the smartest stadium ecosystem ever imagined.
 
 ---
 
-# 🎨 FIFA Inspired Theme
+# 🎥 Hero Experience
 
-The entire interface follows a premium **Neo Futuristic Sports UI** inspired by:
+<p align="center">
 
-* ⚽ FIFA World Cup
-* 🏟️ Modern Football Stadiums
-* 🌌 Cyberpunk aesthetics
-* 💎 Glassmorphism
-* 🔷 Holographic Interfaces
-* 🌠 Neon Stadium Lighting
-* 🎥 Sports Broadcast Graphics
+<img src="assets/hero.gif" width="100%"/>
 
-Primary Colors
-
-* Electric Blue
-* Neon Cyan
-* Stadium White
-* Emerald Green
-* Golden Trophy Gradient
+</p>
 
 ---
 
-# 🌌 Stunning Background Experience
+# 🎬 Opening Animation Sequence
 
-Instead of static backgrounds, Living Stadium OS features an immersive animated environment.
+Instead of opening an application…
 
-### 🌍 Dynamic World Cup Globe
+Users enter a digital stadium.
 
-A slowly rotating illuminated Earth displaying every FIFA World Cup host city.
+✨ Stadium floodlights power on
 
----
+⚽ A 3D football begins rotating
 
-### ⚽ Floating Football
+🌍 The Earth slowly appears
 
-A realistic 3D football continuously rotates with dynamic reflections.
+🏟️ Stadium doors open automatically
 
----
+🚁 AI drones fly overhead
 
-### 🏟️ Digital Stadium
+💎 Thousands of glowing particles assemble the logo
 
-A fully animated low-poly stadium rendered using Three.js.
+🎇 Neon lights illuminate the interface
 
-Floodlights illuminate the field while crowd lighting reacts to user interactions.
+🎤 Crowd chants begin
 
----
+🚀 The camera flies directly into the stadium
 
-### ✨ Particle Universe
-
-Thousands of animated particles move across the background representing live fan activity.
-
-Particles connect with glowing lines when users interact with the interface.
+🤖 AI becomes active
 
 ---
 
-### 🌌 Aurora Sky
+# 🌌 Futuristic Background
 
-Animated gradient sky with moving light waves inspired by stadium laser shows.
+Living Stadium OS never uses static backgrounds.
 
----
+Instead the interface continuously evolves.
 
-### 🛰️ AI Data Streams
+🪐 Animated Space Environment
 
-Floating holographic data packets continuously travel across the screen, visualizing real-time AI processing.
+🌍 Rotating World Map
 
----
+⚽ Floating Football
 
-# 🎬 Cinematic Animations
+🏟️ 3D Stadium
 
-## 🚀 Opening Sequence
+✨ Particle Universe
 
-* FIFA-style intro
-* Stadium lights powering on
-* Camera fly-through
-* Logo particle assembly
-* AI activation sequence
-* Crowd celebration sound
-* Dynamic loading animation
+🌠 Aurora Lights
 
----
+💎 Glass Reflections
 
-## 🏆 Page Transitions
+📡 AI Data Streams
 
-Every page transition behaves like entering another stadium zone.
+🎇 Dynamic Stadium Lights
 
-* Camera Zoom
-* Blur Transition
-* Morphing Containers
-* Liquid Motion
-* Motion Blur
-* Glass Refraction
-* AI Scanning Effect
-* Digital Grid Reveal
+☁ Animated Fog Effects
 
 ---
 
-## ✨ Micro Animations
+# 🏟️ Immersive 3D Experience
 
-Every interaction feels alive.
+<p align="center">
 
-* Hover glow
-* Magnetic buttons
-* Ripple effects
-* Animated icons
-* Floating cards
-* Mouse light effect
-* Animated gradients
-* Elastic buttons
-* Interactive shadows
-* Live counters
-* Morphing borders
+<img src="assets/stadium.gif" width="95%"/>
 
----
+</p>
 
-## ⚽ Match Celebration Mode
+### Includes
 
-Whenever a goal is detected:
-
-* Entire UI shakes slightly
-* Stadium lights flash
-* Confetti explodes
-* Scoreboard updates
-* AI commentator celebrates
-* Crowd animation intensifies
-* Neon pulse spreads across UI
-* Background transforms into celebration mode
+- Interactive Stadium Digital Twin
+- Rotating Football
+- Floating FIFA-inspired Trophy
+- Dynamic Floodlights
+- Animated Crowd
+- Digital Holograms
+- AI Route Visualization
+- Live Crowd Heatmaps
 
 ---
 
 # 🤖 AI Features
 
-## 🧠 GenAI Stadium Copilot
-
-An intelligent assistant capable of:
-
-* Voice conversations
-* Text chat
-* Image understanding
-* Live recommendations
-* Personalized responses
-* Match information
-* Navigation
-* Food recommendations
-* Emergency guidance
+| Feature | Description |
+|----------|-------------|
+| 🧠 AI Copilot | Conversational assistant for fans and staff |
+| 🌍 Multilingual AI | Live translation in 100+ languages |
+| 🗺 Smart Navigation | Crowd-aware route optimization |
+| 📊 Crowd Prediction | Predict congestion before it happens |
+| 🚆 Smart Transport | AI-powered travel recommendations |
+| ♿ Accessibility | Voice, sign language and inclusive navigation |
+| 🌱 Sustainability | Carbon and energy optimization |
+| 🏟 Organizer Dashboard | AI-powered command center |
 
 ---
 
-## 🌍 Multilingual AI
+# 🎉 Goal Celebration Mode
 
-Supports global fans through:
+Whenever a goal is scored...
 
-* Real-time translation
-* Voice translation
-* AI speech synthesis
-* Subtitle generation
-* Live announcements
+🎇 Confetti explodes
 
----
+⚽ Football spins
 
-## 🗺️ AI Navigation
+💡 Stadium lights flash
 
-Interactive navigation powered by AI.
+🔥 Entire interface glows
 
-Features include:
+🎤 AI commentator celebrates
 
-* Smart routing
-* Crowd-aware navigation
-* Wheelchair routes
-* AR navigation
-* Seat guidance
-* Emergency evacuation paths
+🌈 Background transforms
+
+🎉 Scoreboard animates
+
+✨ Particle effects fill the screen
 
 ---
 
-## 📊 Crowd Intelligence
+# 🛰️ AI Dashboard
 
-Predicts:
+<p align="center">
 
-* Congestion
-* Waiting time
-* Queue formation
-* Entry bottlenecks
-* Crowd movement
-* Exit traffic
+<img src="assets/dashboard.gif" width="95%"/>
 
-Organizers receive AI-generated suggestions before issues occur.
+</p>
 
----
+Monitor
 
-## ♿ Accessibility AI
+✔ Crowd Density
 
-Designed for everyone.
+✔ Security
 
-Includes:
+✔ Volunteers
 
-* Voice navigation
-* Sign language avatar
-* High contrast mode
-* AI audio descriptions
-* Cognitive assistance
-* Wheelchair optimized routes
+✔ Medical Alerts
 
----
+✔ Transport
 
-## 🚆 Smart Transport
+✔ Weather
 
-AI predicts:
+✔ Energy Usage
 
-* Metro crowd
-* Taxi availability
-* Parking occupancy
-* Bus schedules
-* Best departure time
+✔ Sustainability
+
+✔ Live AI Recommendations
 
 ---
 
-## 🌱 Sustainability AI
+# 📍 Smart Navigation
 
-Tracks:
+<p align="center">
 
-* Carbon footprint
-* Energy usage
-* Waste management
-* Recycling
-* Water consumption
+<img src="assets/navigation.gif" width="90%"/>
 
-Fans earn **Green Rewards** for sustainable choices.
+</p>
 
----
+The AI generates the fastest route by analyzing
 
-# 🎮 Surprise Features
-
-### 🎥 AI Match Memories
-
-Automatically creates cinematic highlight videos of the fan journey.
+- Crowd Density
+- Gate Availability
+- Walking Speed
+- Accessibility
+- Security Alerts
+- Emergency Conditions
 
 ---
 
-### 📸 AI Selfie Booth
+# 🌍 Digital Twin
 
-Generate FIFA-style posters using AI.
+Living Stadium OS creates a live digital replica of the stadium.
 
----
+Every gate.
 
-### 🏆 AI Fan Passport
+Every fan.
 
-Collect badges, achievements, visited stadiums, and memorable moments.
+Every volunteer.
 
----
+Every transport vehicle.
 
-### ⚡ Goal Celebration UI
+Every emergency.
 
-Every goal transforms the entire interface with dynamic animations.
-
----
-
-### 🎤 AI Match Narrator
-
-Provides live AI commentary in the user's preferred language.
+Everything updates in real time.
 
 ---
 
-### 🌍 Digital Trophy Tour
+# ⚽ Surprise Features
 
-Explore a fully interactive 3D FIFA-inspired trophy experience with smooth animations and educational content.
+🎥 AI Match Memories
 
----
+📸 AI Selfie Booth
 
-### 🏟️ Stadium Digital Twin
+🏆 AI Fan Passport
 
-A complete 3D replica of the stadium displaying live crowd density, entry gates, facilities, transport hubs, emergency exits, and AI-generated operational insights.
+🤖 AI Match Narrator
 
----
+🎁 Personalized Fan Rewards
 
-# 🖥️ Organizer Dashboard
+🌍 Interactive Trophy Showcase
 
-A futuristic command center providing:
+🏟️ Stadium Digital Twin
 
-* Live crowd heatmaps
-* Volunteer tracking
-* Medical alerts
-* Security monitoring
-* Transport analytics
-* Sustainability dashboard
-* AI recommendations
-* Emergency response
-* Operational intelligence
+🎮 Fan Challenges
+
+🏅 Achievement System
 
 ---
 
-# 🛠️ Tech Stack
+# 🛠 Tech Stack
 
-### Frontend
+```text
+Frontend
+├── React
+├── TypeScript
+├── Tailwind CSS
+├── Vite
 
-* React.js
-* Tailwind CSS
-* TypeScript
-* Vite
+Animations
+├── Framer Motion
+├── GSAP
+├── Lenis
+├── Lottie
 
-### Animations
+3D
+├── Three.js
+├── React Three Fiber
+├── Drei
+├── GLSL Shaders
 
-* Framer Motion
-* GSAP
-* Lenis Smooth Scroll
-* Lottie
-* React Spring
+AI
+├── OpenAI
+├── Gemini
+├── RAG
+├── Whisper
+├── Text-to-Speech
 
-### 3D
+Backend
+├── Node.js
+├── Express
+├── FastAPI
 
-* Three.js
-* React Three Fiber
-* Drei
-* GLSL Shaders
-* Spline Integration
-
-### AI
-
-* OpenAI / Gemini API
-* Retrieval Augmented Generation (RAG)
-* Speech-to-Text
-* Text-to-Speech
-* AI Translation
-* AI Recommendations
-
-### Backend
-
-* Node.js
-* Express.js
-* FastAPI
-
-### Database
-
-* Firebase
-* MongoDB
-
-### Deployment
-
-* Vercel
-* Netlify
-* Render
+Database
+├── Firebase
+├── MongoDB
+```
 
 ---
 
-# 🎯 Vision
+# 🏗 System Architecture
 
-Living Stadium OS is not just a stadium management platform—it is a vision for the future of global sporting events. By combining Generative AI, immersive 3D experiences, predictive intelligence, accessibility, sustainability, and cinematic interaction design, it creates an intelligent ecosystem where every fan enjoys a personalized journey and every organizer benefits from proactive, AI-driven decision support. The platform demonstrates how technology can make stadiums safer, smarter, greener, and more engaging, setting a new benchmark for the FIFA World Cup 2026 and future international tournaments.
+<p align="center">
+
+<img src="assets/architecture.png" width="95%"/>
+
+</p>
+
+---
+
+# 🚀 Demo
+
+<p align="center">
+
+<img src="assets/demo.gif" width="100%"/>
+
+</p>
+
+---
+
+# 📸 Screenshots
+
+| Home | AI | Dashboard |
+|------|----|-----------|
+| ![](assets/home.png) | ![](assets/ai.png) | ![](assets/dashboard.png) |
 
 ---
 
 # 🌟 Future Roadmap
 
-* 🥽 AR Indoor Navigation
-* 🤖 AI Digital Human Concierge
-* 🌐 Metaverse Stadium Experience
-* 🛰️ Drone-assisted Crowd Monitoring
-* 🎟️ AI Smart Ticketing
-* 📡 Digital Twin Command Center
-* 🏆 Personalized World Cup Memories
-* 🌍 Global Fan Social Hub
-* 🎮 Interactive Mini Games
-* ⚡ AI Emergency Response Automation
+- 🥽 AR Indoor Navigation
+- 🤖 AI Digital Human
+- 🛰 Drone Crowd Monitoring
+- 🎟 Smart Ticket Prediction
+- 🌍 Metaverse Stadium
+- 🏆 Personalized Match Memories
+- 🎮 Interactive Fan Games
+- ⚡ AI Emergency Automation
+
+---
+
+# 🤝 Contributing
+
+Contributions, ideas, and improvements are welcome.
+
+Fork 🍴
+
+Build 🚀
+
+Create PR 🎯
 
 ---
 
 <p align="center">
 
-## ⭐ *Welcome to the Future of Stadium Intelligence.*
+### ⭐ If you like this project, give it a Star ⭐
 
-### **Living Stadium OS — Where AI Meets the World's Biggest Football Tournament.**
+<img src="https://capsule-render.vercel.app/api?type=waving&section=footer&height=180&color=gradient&customColorList=12,20,24,26,30"/>
 
-**Built for FIFA World Cup 2026 ⚽**
+### ⚽ Living Stadium OS
+
+### *Where AI Meets Football.*
+
+**Built for FIFA World Cup 2026**
 
 </p>
