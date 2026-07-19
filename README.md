@@ -6,7 +6,7 @@
 
 <h1 align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=700&size=30&duration=3000&pause=1000&color=00F5FF&center=true&vCenter=true&width=1000&lines=⚽+Welcome+to+Living+Stadium+OS;🏟️+The+Future+of+Smart+Stadiums;🤖+Powered+by+Generative+AI;🌍+Built+for+FIFA+World+Cup+2026;🚀+3D+Immersive+Experience;🎯+Real-Time+Operational+Intelligence;✨+Designed+to+Amaze+Every+Fan"/>
+<img src="https://media.tenor.com/d9d4dXRPY5IAAAAi/world-cup-2026-world-cup.gif"/>
 
 </h1>
 
