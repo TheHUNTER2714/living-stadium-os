@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReelRouteImport } from './routes/reel'
+import { Route as PassportRouteImport } from './routes/passport'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ArRouteImport } from './routes/ar'
 import { Route as IndexRouteImport } from './routes/index'
@@ -17,6 +18,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const ReelRoute = ReelRouteImport.update({
   id: '/reel',
   path: '/reel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PassportRoute = PassportRouteImport.update({
+  id: '/passport',
+  path: '/passport',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ar': typeof ArRoute
   '/dashboard': typeof DashboardRoute
+  '/passport': typeof PassportRoute
   '/reel': typeof ReelRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ar': typeof ArRoute
   '/dashboard': typeof DashboardRoute
+  '/passport': typeof PassportRoute
   '/reel': typeof ReelRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/ar': typeof ArRoute
   '/dashboard': typeof DashboardRoute
+  '/passport': typeof PassportRoute
   '/reel': typeof ReelRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ar' | '/dashboard' | '/reel'
+  fullPaths: '/' | '/ar' | '/dashboard' | '/passport' | '/reel'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ar' | '/dashboard' | '/reel'
-  id: '__root__' | '/' | '/ar' | '/dashboard' | '/reel'
+  to: '/' | '/ar' | '/dashboard' | '/passport' | '/reel'
+  id: '__root__' | '/' | '/ar' | '/dashboard' | '/passport' | '/reel'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArRoute: typeof ArRoute
   DashboardRoute: typeof DashboardRoute
+  PassportRoute: typeof PassportRoute
   ReelRoute: typeof ReelRoute
 }
 
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/reel'
       fullPath: '/reel'
       preLoaderRoute: typeof ReelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/passport': {
+      id: '/passport'
+      path: '/passport'
+      fullPath: '/passport'
+      preLoaderRoute: typeof PassportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArRoute: ArRoute,
   DashboardRoute: DashboardRoute,
+  PassportRoute: PassportRoute,
   ReelRoute: ReelRoute,
 }
 export const routeTree = rootRouteImport
