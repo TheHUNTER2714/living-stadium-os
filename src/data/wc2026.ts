@@ -100,36 +100,8 @@ export const TEAMS: Team[] = [
   { code: "SRB", name: "Serbia", flag: "🇷🇸", group: "W", color: "#C6363C", accent: "#0C4076",
     players: [P("Predrag Rajković","GK",1,"Al-Ittihad"),P("Nikola Milenković","DF",4,"Nottingham"),P("Strahinja Pavlović","DF",5,"Man United"),P("Sergej Milinković-Savić","MF",20,"Al-Hilal"),P("Dušan Tadić","MF",10,"Fenerbahçe"),P("Aleksandar Mitrović","FW",9,"Al-Hilal"),P("Dušan Vlahović","FW",18,"Juventus"),P("Filip Kostić","FW",7,"Fenerbahçe"),P("Nemanja Gudelj","MF",13,"Sevilla"),P("Andrija Živković","FW",21,"PAOK")],
   },
-  // Additional confirmed / expected qualifiers (rosters simplified)
-  ...([
-    ["EGY","Egypt","🇪🇬","X","#CE1126","#000000",[["Mohamed El Shenawy","GK",1],["Mohamed Salah","FW",10,"Liverpool"],["Trezeguet","FW",21],["Omar Marmoush","FW",11,"Man City"],["Emam Ashour","MF",8]]],
-    ["NGA","Nigeria","🇳🇬","X","#008751","#FFFFFF",[["Stanley Nwabali","GK",23],["William Troost-Ekong","DF",5],["Ademola Lookman","FW",11,"Atalanta"],["Victor Osimhen","FW",9,"Galatasaray"],["Wilfred Ndidi","MF",4,"Leicester"]]],
-    ["CIV","Ivory Coast","🇨🇮","X","#F77F00","#009E60",[["Yahia Fofana","GK",23],["Franck Kessié","MF",19,"Al-Ahli"],["Sébastien Haller","FW",17,"Utrecht"],["Nicolas Pépé","FW",9,"Villarreal"],["Simon Adingra","FW",11,"Brighton"]]],
-    ["ALG","Algeria","🇩🇿","X","#006233","#D21034",[["Raïs M'Bolhi","GK",23],["Riyad Mahrez","FW",7,"Al-Ahli"],["Ismaël Bennacer","MF",8,"Milan"],["Baghdad Bounedjah","FW",9,"Al-Sadd"],["Youcef Belaïli","FW",10,"Espérance"]]],
-    ["TUN","Tunisia","🇹🇳","X","#E70013","#FFFFFF",[["Aymen Dahmen","GK",1],["Wahbi Khazri","FW",10],["Youssef Msakni","FW",7],["Naïm Sliti","FW",21],["Ellyes Skhiri","MF",13,"Frankfurt"]]],
-    ["CMR","Cameroon","🇨🇲","X","#007A5E","#CE1126",[["André Onana","GK",24,"Man United"],["Vincent Aboubakar","FW",10,"Besiktas"],["Karl Toko Ekambi","FW",11,"Abha"],["André-Frank Zambo Anguissa","MF",8,"Napoli"],["Bryan Mbeumo","FW",19,"Brentford"]]],
-    ["GHA","Ghana","🇬🇭","X","#FCD116","#006B3F",[["Richard Ofori","GK",1],["Mohammed Kudus","MF",20,"West Ham"],["Jordan Ayew","FW",10,"Leicester"],["Thomas Partey","MF",5,"Arsenal"],["Antoine Semenyo","FW",11,"Bournemouth"]]],
-    ["QAT","Qatar","🇶🇦","Y","#8A1538","#FFFFFF",[["Meshaal Barsham","GK",22],["Almoez Ali","FW",19],["Akram Afif","FW",11],["Hassan Al-Haydos","MF",10],["Boualem Khoukhi","DF",13]]],
-    ["SAU","Saudi Arabia","🇸🇦","Y","#006C35","#FFFFFF",[["Mohammed Al-Owais","GK",21],["Salem Al-Dawsari","FW",10],["Salman Al-Faraj","MF",7],["Firas Al-Buraikan","FW",9],["Saleh Al-Shehri","FW",11]]],
-    ["JOR","Jordan","🇯🇴","Y","#000000","#CE1126",[["Yazeed Abu Laila","GK",22],["Musa Al-Taamari","FW",7,"Montpellier"],["Yazan Al-Naimat","FW",11],["Nizar Al-Rashdan","MF",8],["Ehsan Haddad","MF",14]]],
-    ["UZB","Uzbekistan","🇺🇿","Y","#1EB53A","#0099B5",[["Utkir Yusupov","GK",23],["Eldor Shomurodov","FW",7,"Roma"],["Jaloliddin Masharipov","MF",10],["Abbosbek Fayzullaev","MF",6,"CSKA"],["Igor Sergeev","FW",9]]],
-    ["NZL","New Zealand","🇳🇿","Z","#FFFFFF","#000000",[["Alex Paulsen","GK",1],["Chris Wood","FW",9,"Nottingham"],["Marko Stamenić","MF",8,"Olympiacos"],["Callum McCowatt","FW",11],["Tim Payne","DF",5]]],
-    ["PAN","Panama","🇵🇦","Z","#DA121A","#005AA7",[["Orlando Mosquera","GK",1],["Adalberto Carrasquilla","MF",8],["Michael Amir Murillo","DF",23],["Ismael Díaz","FW",20],["José Fajardo","FW",9]]],
-    ["CRC","Costa Rica","🇨🇷","Z","#002B7F","#CE1126",[["Keylor Navas","GK",1],["Celso Borges","MF",5],["Joel Campbell","FW",12],["Alonso Martínez","FW",22],["Manfred Ugalde","FW",9,"Spartak"]]],
-    ["JAM","Jamaica","🇯🇲","Z","#009B3A","#FED100",[["Andre Blake","GK",1],["Michail Antonio","FW",9,"West Ham"],["Leon Bailey","FW",11,"Aston Villa"],["Bobby De Cordova-Reid","FW",23,"Leicester"],["Demarai Gray","FW",7,"Al-Ettifaq"]]],
-    ["CHI","Chile","🇨🇱","Z","#D52B1E","#0039A6",[["Claudio Bravo","GK",1],["Arturo Vidal","MF",8),null,]," "],
-    ["PER","Peru","🇵🇪","Z","#D91023","#FFFFFF",[["Pedro Gallese","GK",1],["Paolo Guerrero","FW",9],["Christian Cueva","MF",10],["André Carrillo","FW",18],["Gianluca Lapadula","FW",26]]],
-    ["PAR","Paraguay","🇵🇾","Z","#D52B1E","#0038A8",[["Antony Silva","GK",1],["Miguel Almirón","FW",10,"Newcastle"],["Julio Enciso","FW",23,"Brighton"],["Ángel Romero","FW",11],["Gustavo Gómez","DF",4,"Palmeiras"]]],
-    ["VEN","Venezuela","🇻🇪","Z","#FCD116","#00247D",[["Rafael Romo","GK",1],["Salomón Rondón","FW",23,"Pachuca"],["Yeferson Soteldo","FW",10,"Fluminense"],["Josef Martínez","FW",7,"Inter Miami"],["Yangel Herrera","MF",8,"Girona"]]],
-    ["TUR","Türkiye","🇹🇷","W","#E30A17","#FFFFFF",[["Uğurcan Çakır","GK",1],["Merih Demiral","DF",3,"Al-Ahli"],["Hakan Çalhanoğlu","MF",10,"Inter"],["Arda Güler","MF",20,"Real Madrid"),["Kenan Yıldız","FW",21,"Juventus"]]],
-    ["UKR","Ukraine","🇺🇦","W","#005BBB","#FFD500",[["Anatoliy Trubin","GK",1,"Benfica"],["Mykhailo Mudryk","FW",10,"Chelsea"],["Oleksandr Zinchenko","DF",17,"Arsenal"],["Artem Dovbyk","FW",9,"Roma"],["Georgiy Sudakov","MF",8,"Shakhtar"]]],
-    ["AUT","Austria","🇦🇹","V","#ED2939","#FFFFFF",[["Alexander Schlager","GK",1],["David Alaba","DF",8,"Real Madrid"],["Marcel Sabitzer","MF",7,"Dortmund"],["Marko Arnautović","FW",7,"Inter"],["Konrad Laimer","MF",6,"Bayern"]]],
-    ["HUN","Hungary","🇭🇺","V","#436F4D","#CD2A3E",[["Péter Gulácsi","GK",1,"Leipzig"],["Willi Orbán","DF",4,"Leipzig"],["Dominik Szoboszlai","MF",10,"Liverpool"],["Barnabás Varga","FW",19,"Ferencváros"],["Roland Sallai","FW",20,"Freiburg"]]],
-    ["ISL","Iceland","🇮🇸","U","#003897","#D72828",[["Hákon Valdimarsson","GK",1],["Albert Guðmundsson","FW",8,"Fiorentina"],["Gylfi Sigurðsson","MF",10],["Jón Daði Böðvarsson","FW",9],["Andri Guðjohnsen","FW",14]]],
-    ["WAL","Wales","🏴󠁧󠁢󠁷󠁬󠁳󠁿","U","#C8102E","#00B140",[["Danny Ward","GK",12],["Ben Davies","DF",3,"Tottenham"],["Aaron Ramsey","MF",10,"Cardiff"],["Kieffer Moore","FW",13,"Sheffield United"],["Brennan Johnson","FW",11,"Tottenham"]]],
-    ["SCO","Scotland","🏴󠁧󠁢󠁳󠁣󠁴󠁿","T","#0065BF","#FFFFFF",[["Angus Gunn","GK",1,"Norwich"],["Andy Robertson","DF",3,"Liverpool"],["Scott McTominay","MF",4,"Napoli"),["John McGinn","MF",7,"Aston Villa"],["Che Adams","FW",10,"Torino"]]],
-  ] as any).filter((_: any) => true).slice(0, 0), // stripped due to size — replaced with clean list below
 ];
+
 
 // Clean expansion (removes the fragile literal block above with real objects).
 export const EXTRA_TEAMS: Team[] = [
