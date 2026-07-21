@@ -129,11 +129,15 @@ function Dashboard() {
     const ts = new Date().toLocaleTimeString("en-US", { hour12: false }).slice(0, 5);
     setChat((c) => [...c, { role: "user", text: q, ts }]);
     setMessage("");
+    setAiThinking(true);
     setTimeout(() => {
       const intent = classifyIntent(q);
       const reply = COPILOT[lang][intent];
       setChat((c) => [...c, { role: "ai", text: reply, ts }]);
-      if (voiceOut && viaVoice) speak(reply, langMeta.voice);
+      setAiThinking(false);
+      // Speak every reply (voice, text — anything) — not just voice-triggered ones
+      if (voiceOut) speak(reply, langMeta.voice);
+      void viaVoice;
     }, 550);
   };
 
