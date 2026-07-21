@@ -581,6 +581,36 @@ function Reel() {
             </div>
           </div>
 
+          {/* Animated background particle field (behind text, above scene) */}
+          <div className="absolute inset-0 pointer-events-none z-[5] mix-blend-screen opacity-40">
+            {Array.from({ length: 18 }).map((_, i) => (
+              <div key={i} className="absolute rounded-full blur-2xl"
+                style={{
+                  left: `${(i * 53) % 100}%`, top: `${(i * 37) % 100}%`,
+                  width: 60 + (i % 5) * 30, height: 60 + (i % 5) * 30,
+                  background: [team?.color ?? "#22d3ee", team?.accent ?? "#fbbf24", "#22c55e"][i % 3],
+                  animation: `orb-drift ${8 + (i % 5) * 2}s ease-in-out ${i * 0.3}s infinite`,
+                }} />
+            ))}
+          </div>
+
+          {/* Hero player avatar chip */}
+          {(() => {
+            const heroPlayer = team?.players.find((p) => p.name === player);
+            if (!heroPlayer) return null;
+            return (
+              <div key={scene} className="absolute top-6 right-6 z-20 flex items-center gap-3 bg-black/60 backdrop-blur border border-neon-gold/50 rounded-xl p-2 pr-4"
+                style={{ animation: "slide-up-fade 500ms ease-out both" }}>
+                <img src={playerAvatar(heroPlayer, team)} alt={heroPlayer.name} className="size-12 rounded-lg shadow-[0_0_20px_rgba(251,191,36,0.4)]" />
+                <div>
+                  <div className="font-mono text-[9px] text-neon-gold uppercase tracking-widest">#{heroPlayer.no} · {heroPlayer.pos}</div>
+                  <div className="font-display tracking-wide text-white text-sm leading-tight">{heroPlayer.name}</div>
+                  <div className="font-mono text-[9px] text-white/50">{team!.flag} {team!.name}</div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Corner brackets */}
           <div className="absolute top-4 left-4 size-8 border-t-2 border-l-2 border-neon-cyan/60" />
           <div className="absolute top-4 right-4 size-8 border-t-2 border-r-2 border-neon-cyan/60" />
