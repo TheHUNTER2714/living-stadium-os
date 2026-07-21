@@ -229,10 +229,25 @@ function Dashboard() {
         <div className="col-span-12 lg:col-span-3 flex flex-col gap-4" style={{ animation: "slide-up-fade 0.6s ease-out both" }}>
           <section className="glass-panel flex-1 flex flex-col min-h-[420px]">
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
-              <div>
-                <div className="font-display tracking-wider text-neon-cyan text-lg">GENAI COPILOT</div>
-                <div className="text-[9px] font-mono text-white/40">
-                  {langMeta.flag} {langMeta.label} · voice {voiceOut ? "on" : "off"} · {voiceSupported ? "STT ready" : "STT unavailable"}
+              <div className="flex items-center gap-3">
+                <RobotMascot
+                  size={56}
+                  speaking={aiSpeaking}
+                  emotion={
+                    (listening ? "listening" :
+                     aiThinking ? "thinking" :
+                     alerts.some((a) => a.severity === "crit") ? "alert" :
+                     aiSpeaking ? "happy" : "idle") as RobotEmotion
+                  }
+                />
+                <div>
+                  <div className="font-display tracking-wider text-neon-cyan text-lg leading-none">GENAI COPILOT</div>
+                  <div className="text-[9px] font-mono text-white/40 mt-1">
+                    {langMeta.flag} {langMeta.label} · {aiSpeaking ? "speaking…" : listening ? "listening…" : aiThinking ? "thinking…" : "standby"}
+                  </div>
+                  <div className="text-[9px] font-mono text-white/30">
+                    voice {voiceOut ? "on" : "off"} · latency alerts silent · {voiceSupported ? "STT ready" : "STT off"}
+                  </div>
                 </div>
               </div>
               <button onClick={() => setVoiceOut((v) => !v)}
