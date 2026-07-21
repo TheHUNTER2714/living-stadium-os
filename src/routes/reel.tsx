@@ -388,13 +388,53 @@ function Reel() {
               )}
 
               <Section title="5 · Audio">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={!muted} onChange={(e) => setMuted(!e.target.checked)} className="size-4 accent-neon-cyan" />
-                  <span className="text-sm">
-                    Play <span className="text-neon-gold">StadiumOS funk backing loop</span> during reel
-                    <span className="block text-[10px] text-white/40 font-mono">Web Audio · synthesized · zero external assets</span>
-                  </span>
-                </label>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={!muted} onChange={(e) => setMuted(!e.target.checked)} className="size-4 accent-neon-cyan" />
+                    <span className="text-sm">
+                      Play soundtrack during reel
+                      <span className="block text-[10px] text-white/40 font-mono">Custom upload wins over built-in funk loop</span>
+                    </span>
+                  </label>
+
+                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 border-dashed cursor-pointer transition ${customTrackName ? "border-neon-gold bg-neon-gold/5" : "border-white/15 hover:border-neon-gold/50"}`}>
+                    <input type="file" accept="audio/*" className="hidden" onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (!f) return;
+                      customFileRef.current = f;
+                      setCustomTrackName(f.name);
+                    }} />
+                    <div className="size-10 rounded bg-white/5 flex items-center justify-center text-lg">🎵</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display tracking-wide text-sm truncate">{customTrackName ?? "Upload your funk track"}</div>
+                      <div className="text-[10px] font-mono text-white/50 truncate">{customTrackName ? "Locked · will loop under scenes" : "MP3, WAV, OGG · local only"}</div>
+                    </div>
+                    {customTrackName && (
+                      <button onClick={(e) => { e.preventDefault(); customFileRef.current = null; setCustomTrackName(null); }}
+                        className="text-[10px] font-mono text-neon-alert hover:underline">REMOVE</button>
+                    )}
+                  </label>
+
+                  <div>
+                    <div className="flex justify-between text-[10px] font-mono text-white/60 mb-1">
+                      <span>MASTER VOLUME</span>
+                      <span className="text-neon-cyan tabular-nums">{Math.round(volume * 100)}%</span>
+                    </div>
+                    <input type="range" min={0} max={1} step={0.01} value={volume}
+                      onChange={(e) => setVolume(parseFloat(e.target.value))}
+                      className="w-full accent-neon-gold" />
+                  </div>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={sfxOn} onChange={(e) => setSfxOn(e.target.checked)} className="size-4 accent-neon-cyan" />
+                    <span className="text-sm">
+                      Style FX cues on every cut
+                      <span className="block text-[10px] text-white/40 font-mono">
+                        {style === "cinematic" ? "Orchestral swell" : style === "broadcast" ? "Broadcast whoosh + beep" : style === "vhs" ? "Tape static + wobble" : "Funk snare hit"}
+                      </span>
+                    </span>
+                  </label>
+                </div>
               </Section>
 
               <button onClick={generate}
@@ -576,11 +616,7 @@ function Reel() {
                   {passport?.name ?? "Fan"}'s {STYLES.find(s => s.key === style)?.name} reel · {team?.flag} {team?.name} · {player}
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <button onClick={() => {
-                    setPhase("playing"); setScene(0); setProgress(0);
-                    startedAt.current = performance.now();
-                    if (style === "funk" && !muted) { funkRef.current = createFunkLoop({ bpm: 110 }); funkRef.current.start(); }
-                  }}
+                  <button onClick={() => { void startPlayback(); }}
                     className="px-6 py-3 bg-neon-cyan text-black font-display tracking-widest text-sm rounded">REPLAY</button>
                   <button onClick={downloadPoster}
                     className="px-6 py-3 border border-neon-gold text-neon-gold font-display tracking-widest text-sm rounded hover:bg-neon-gold hover:text-black transition">DOWNLOAD POSTER</button>
