@@ -686,6 +686,11 @@ function Reel() {
           92% { opacity: 0.5; transform: translateY(60vh); }
           95% { opacity: 0.3; transform: translateY(20vh); }
         }
+        @keyframes orb-drift {
+          0%,100% { transform: translate(0,0) scale(1); }
+          33% { transform: translate(30px,-20px) scale(1.15); }
+          66% { transform: translate(-25px,15px) scale(0.9); }
+        }
       `}</style>
     </div>
   );
