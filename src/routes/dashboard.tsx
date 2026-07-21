@@ -6,6 +6,7 @@ import { loadPassport, savePassport } from "@/lib/passport";
 import { getTeam } from "@/data/wc2026";
 import { COPILOT, LANGUAGES, classifyIntent, type LangCode } from "@/data/i18n";
 import { createPTT, speak, cancelSpeech } from "@/lib/voice";
+import { RobotMascot, type RobotEmotion } from "@/components/RobotMascot";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Mission Control · StadiumOS AI" }] }),
@@ -50,8 +51,19 @@ function Dashboard() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [rulesOpen, setRulesOpen] = useState(false);
   const alertIdRef = useRef(0);
+  const [aiThinking, setAiThinking] = useState(false);
+  const [aiSpeaking, setAiSpeaking] = useState(false);
 
   const CAPACITY = 87523;
+
+  // Poll speechSynthesis so the robot's mouth animates whenever anything is spoken
+  useEffect(() => {
+    const i = setInterval(() => {
+      const s = typeof window !== "undefined" ? window.speechSynthesis : null;
+      setAiSpeaking(!!s?.speaking);
+    }, 120);
+    return () => clearInterval(i);
+  }, []);
 
   // Clock
   useEffect(() => {
