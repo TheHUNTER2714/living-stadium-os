@@ -6,6 +6,7 @@ import { loadPassport, savePassport } from "@/lib/passport";
 import { getTeam } from "@/data/wc2026";
 import { COPILOT, LANGUAGES, classifyIntent, type LangCode } from "@/data/i18n";
 import { createPTT, speak, cancelSpeech } from "@/lib/voice";
+import { RobotMascot, type RobotEmotion } from "@/components/RobotMascot";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Mission Control · StadiumOS AI" }] }),
@@ -50,8 +51,19 @@ function Dashboard() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [rulesOpen, setRulesOpen] = useState(false);
   const alertIdRef = useRef(0);
+  const [aiThinking, setAiThinking] = useState(false);
+  const [aiSpeaking, setAiSpeaking] = useState(false);
 
   const CAPACITY = 87523;
+
+  // Poll speechSynthesis so the robot's mouth animates whenever anything is spoken
+  useEffect(() => {
+    const i = setInterval(() => {
+      const s = typeof window !== "undefined" ? window.speechSynthesis : null;
+      setAiSpeaking(!!s?.speaking);
+    }, 120);
+    return () => clearInterval(i);
+  }, []);
 
   // Clock
   useEffect(() => {
@@ -117,11 +129,15 @@ function Dashboard() {
     const ts = new Date().toLocaleTimeString("en-US", { hour12: false }).slice(0, 5);
     setChat((c) => [...c, { role: "user", text: q, ts }]);
     setMessage("");
+    setAiThinking(true);
     setTimeout(() => {
       const intent = classifyIntent(q);
       const reply = COPILOT[lang][intent];
       setChat((c) => [...c, { role: "ai", text: reply, ts }]);
-      if (voiceOut && viaVoice) speak(reply, langMeta.voice);
+      setAiThinking(false);
+      // Speak every reply (voice, text — anything) — not just voice-triggered ones
+      if (voiceOut) speak(reply, langMeta.voice);
+      void viaVoice;
     }, 550);
   };
 
@@ -213,10 +229,25 @@ function Dashboard() {
         <div className="col-span-12 lg:col-span-3 flex flex-col gap-4" style={{ animation: "slide-up-fade 0.6s ease-out both" }}>
           <section className="glass-panel flex-1 flex flex-col min-h-[420px]">
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
-              <div>
-                <div className="font-display tracking-wider text-neon-cyan text-lg">GENAI COPILOT</div>
-                <div className="text-[9px] font-mono text-white/40">
-                  {langMeta.flag} {langMeta.label} · voice {voiceOut ? "on" : "off"} · {voiceSupported ? "STT ready" : "STT unavailable"}
+              <div className="flex items-center gap-3">
+                <RobotMascot
+                  size={56}
+                  speaking={aiSpeaking}
+                  emotion={
+                    (listening ? "listening" :
+                     aiThinking ? "thinking" :
+                     alerts.some((a) => a.severity === "crit") ? "alert" :
+                     aiSpeaking ? "happy" : "idle") as RobotEmotion
+                  }
+                />
+                <div>
+                  <div className="font-display tracking-wider text-neon-cyan text-lg leading-none">GENAI COPILOT</div>
+                  <div className="text-[9px] font-mono text-white/40 mt-1">
+                    {langMeta.flag} {langMeta.label} · {aiSpeaking ? "speaking…" : listening ? "listening…" : aiThinking ? "thinking…" : "standby"}
+                  </div>
+                  <div className="text-[9px] font-mono text-white/30">
+                    voice {voiceOut ? "on" : "off"} · latency alerts silent · {voiceSupported ? "STT ready" : "STT off"}
+                  </div>
                 </div>
               </div>
               <button onClick={() => setVoiceOut((v) => !v)}

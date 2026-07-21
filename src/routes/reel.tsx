@@ -7,6 +7,8 @@ import stadiumTwin from "@/assets/stadium-twin.jpg";
 import { getTeam } from "@/data/wc2026";
 import { loadPassport } from "@/lib/passport";
 import { createFunkLoop, type FunkHandle } from "@/lib/funk-audio";
+import { createReelSFX, type SFXHandle } from "@/lib/reel-sfx";
+import { playerAvatar } from "@/lib/player-avatar";
 
 export const Route = createFileRoute("/reel")({
   head: () => ({ meta: [{ title: "Highlight Reel · StadiumOS AI" }] }),
@@ -36,6 +38,10 @@ function Reel() {
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [uploadType, setUploadType] = useState<"video" | "image" | null>(null);
   const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(0.7);
+  const [sfxOn, setSfxOn] = useState(true);
+  const [customTrackName, setCustomTrackName] = useState<string | null>(null);
+  const customFileRef = useRef<File | null>(null);
 
   const [buildStep, setBuildStep] = useState(0);
   const [scene, setScene] = useState(0);
@@ -44,9 +50,9 @@ function Reel() {
   const rafRef = useRef<number | null>(null);
   const startedAt = useRef<number>(0);
   const funkRef = useRef<FunkHandle | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const sfxRef = useRef<SFXHandle | null>(null);
+  const customSrcRef = useRef<AudioBufferSourceNode | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Build scenes dynamically from team + player + upload
   const SCENES = useMemo(() => {
@@ -125,25 +131,56 @@ function Reel() {
     setBuildStep(0);
   };
 
+  const stopAudio = () => {
+    try { customSrcRef.current?.stop(); } catch {}
+    customSrcRef.current = null;
+    funkRef.current?.stop();
+    funkRef.current = null;
+    sfxRef.current?.stopAll();
+    sfxRef.current?.destroy();
+    sfxRef.current = null;
+  };
+
+  const startPlayback = async () => {
+    setPhase("playing");
+    setScene(0);
+    setProgress(0);
+    startedAt.current = performance.now();
+    if (muted) return;
+    // Set up SFX engine (handles style cues + custom track)
+    const sfx = createReelSFX(style);
+    sfx.setVolume(volume);
+    sfxRef.current = sfx;
+    // Custom uploaded track wins over funk
+    if (customFileRef.current) {
+      try {
+        const buf = await sfx.loadFile(customFileRef.current);
+        const src = sfx.playCustom(buf, true);
+        customSrcRef.current = src;
+      } catch {
+        // fall back
+        if (style === "funk") { funkRef.current = createFunkLoop({ bpm: 110 }); funkRef.current.start(); }
+      }
+    } else if (style === "funk") {
+      funkRef.current = createFunkLoop({ bpm: 110 });
+      funkRef.current.start();
+      funkRef.current.setVolume(volume * 0.7);
+    }
+    // Fire opening cue
+    if (sfxOn) setTimeout(() => sfxRef.current?.playCue(style === "cinematic" ? "swell" : "scene"), 120);
+  };
+
   // Building sequence
   useEffect(() => {
     if (phase !== "building") return;
     if (buildStep >= BUILD_STEPS.length) {
-      const t = setTimeout(() => {
-        setPhase("playing");
-        setScene(0);
-        setProgress(0);
-        startedAt.current = performance.now();
-        if (style === "funk" && !muted) {
-          funkRef.current = createFunkLoop({ bpm: 110 });
-          funkRef.current.start();
-        }
-      }, 500);
+      const t = setTimeout(() => { void startPlayback(); }, 500);
       return () => clearTimeout(t);
     }
     const t = setTimeout(() => setBuildStep((s) => s + 1), 600);
     return () => clearTimeout(t);
-  }, [phase, buildStep, BUILD_STEPS.length, style, muted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, buildStep, BUILD_STEPS.length]);
 
   // Playback loop
   useEffect(() => {
@@ -155,20 +192,27 @@ function Reel() {
       const s = Math.min(SCENES.length - 1, Math.floor(elapsed / SCENE_MS));
       setScene(s);
       if (p < 1) rafRef.current = requestAnimationFrame(loop);
-      else {
-        setPhase("done");
-        funkRef.current?.stop();
-        funkRef.current = null;
-      }
+      else { setPhase("done"); stopAudio(); }
     };
     rafRef.current = requestAnimationFrame(loop);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, TOTAL_MS, SCENE_MS, SCENES.length]);
 
+  // Scene-change SFX cue
+  useEffect(() => {
+    if (phase !== "playing" || !sfxOn || muted) return;
+    sfxRef.current?.playCue("scene");
+  }, [scene, phase, sfxOn, muted]);
+
+  // Live volume changes
+  useEffect(() => {
+    sfxRef.current?.setVolume(volume);
+    funkRef.current?.setVolume(volume * 0.7);
+  }, [volume]);
+
   // Cleanup
-  useEffect(() => () => { funkRef.current?.stop(); }, []);
+  useEffect(() => () => { stopAudio(); }, []);
 
   // "Download" — render stage to canvas snapshot as PNG poster + JSON manifest
   const downloadPoster = async () => {
@@ -344,13 +388,53 @@ function Reel() {
               )}
 
               <Section title="5 · Audio">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={!muted} onChange={(e) => setMuted(!e.target.checked)} className="size-4 accent-neon-cyan" />
-                  <span className="text-sm">
-                    Play <span className="text-neon-gold">StadiumOS funk backing loop</span> during reel
-                    <span className="block text-[10px] text-white/40 font-mono">Web Audio · synthesized · zero external assets</span>
-                  </span>
-                </label>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={!muted} onChange={(e) => setMuted(!e.target.checked)} className="size-4 accent-neon-cyan" />
+                    <span className="text-sm">
+                      Play soundtrack during reel
+                      <span className="block text-[10px] text-white/40 font-mono">Custom upload wins over built-in funk loop</span>
+                    </span>
+                  </label>
+
+                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 border-dashed cursor-pointer transition ${customTrackName ? "border-neon-gold bg-neon-gold/5" : "border-white/15 hover:border-neon-gold/50"}`}>
+                    <input type="file" accept="audio/*" className="hidden" onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (!f) return;
+                      customFileRef.current = f;
+                      setCustomTrackName(f.name);
+                    }} />
+                    <div className="size-10 rounded bg-white/5 flex items-center justify-center text-lg">🎵</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display tracking-wide text-sm truncate">{customTrackName ?? "Upload your funk track"}</div>
+                      <div className="text-[10px] font-mono text-white/50 truncate">{customTrackName ? "Locked · will loop under scenes" : "MP3, WAV, OGG · local only"}</div>
+                    </div>
+                    {customTrackName && (
+                      <button onClick={(e) => { e.preventDefault(); customFileRef.current = null; setCustomTrackName(null); }}
+                        className="text-[10px] font-mono text-neon-alert hover:underline">REMOVE</button>
+                    )}
+                  </label>
+
+                  <div>
+                    <div className="flex justify-between text-[10px] font-mono text-white/60 mb-1">
+                      <span>MASTER VOLUME</span>
+                      <span className="text-neon-cyan tabular-nums">{Math.round(volume * 100)}%</span>
+                    </div>
+                    <input type="range" min={0} max={1} step={0.01} value={volume}
+                      onChange={(e) => setVolume(parseFloat(e.target.value))}
+                      className="w-full accent-neon-gold" />
+                  </div>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={sfxOn} onChange={(e) => setSfxOn(e.target.checked)} className="size-4 accent-neon-cyan" />
+                    <span className="text-sm">
+                      Style FX cues on every cut
+                      <span className="block text-[10px] text-white/40 font-mono">
+                        {style === "cinematic" ? "Orchestral swell" : style === "broadcast" ? "Broadcast whoosh + beep" : style === "vhs" ? "Tape static + wobble" : "Funk snare hit"}
+                      </span>
+                    </span>
+                  </label>
+                </div>
               </Section>
 
               <button onClick={generate}
@@ -497,6 +581,36 @@ function Reel() {
             </div>
           </div>
 
+          {/* Animated background particle field (behind text, above scene) */}
+          <div className="absolute inset-0 pointer-events-none z-[5] mix-blend-screen opacity-40">
+            {Array.from({ length: 18 }).map((_, i) => (
+              <div key={i} className="absolute rounded-full blur-2xl"
+                style={{
+                  left: `${(i * 53) % 100}%`, top: `${(i * 37) % 100}%`,
+                  width: 60 + (i % 5) * 30, height: 60 + (i % 5) * 30,
+                  background: [team?.color ?? "#22d3ee", team?.accent ?? "#fbbf24", "#22c55e"][i % 3],
+                  animation: `orb-drift ${8 + (i % 5) * 2}s ease-in-out ${i * 0.3}s infinite`,
+                }} />
+            ))}
+          </div>
+
+          {/* Hero player avatar chip */}
+          {(() => {
+            const heroPlayer = team?.players.find((p) => p.name === player);
+            if (!heroPlayer) return null;
+            return (
+              <div key={scene} className="absolute top-6 right-6 z-20 flex items-center gap-3 bg-black/60 backdrop-blur border border-neon-gold/50 rounded-xl p-2 pr-4"
+                style={{ animation: "slide-up-fade 500ms ease-out both" }}>
+                <img src={playerAvatar(heroPlayer, team)} alt={heroPlayer.name} className="size-12 rounded-lg shadow-[0_0_20px_rgba(251,191,36,0.4)]" />
+                <div>
+                  <div className="font-mono text-[9px] text-neon-gold uppercase tracking-widest">#{heroPlayer.no} · {heroPlayer.pos}</div>
+                  <div className="font-display tracking-wide text-white text-sm leading-tight">{heroPlayer.name}</div>
+                  <div className="font-mono text-[9px] text-white/50">{team!.flag} {team!.name}</div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Corner brackets */}
           <div className="absolute top-4 left-4 size-8 border-t-2 border-l-2 border-neon-cyan/60" />
           <div className="absolute top-4 right-4 size-8 border-t-2 border-r-2 border-neon-cyan/60" />
@@ -532,11 +646,7 @@ function Reel() {
                   {passport?.name ?? "Fan"}'s {STYLES.find(s => s.key === style)?.name} reel · {team?.flag} {team?.name} · {player}
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <button onClick={() => {
-                    setPhase("playing"); setScene(0); setProgress(0);
-                    startedAt.current = performance.now();
-                    if (style === "funk" && !muted) { funkRef.current = createFunkLoop({ bpm: 110 }); funkRef.current.start(); }
-                  }}
+                  <button onClick={() => { void startPlayback(); }}
                     className="px-6 py-3 bg-neon-cyan text-black font-display tracking-widest text-sm rounded">REPLAY</button>
                   <button onClick={downloadPoster}
                     className="px-6 py-3 border border-neon-gold text-neon-gold font-display tracking-widest text-sm rounded hover:bg-neon-gold hover:text-black transition">DOWNLOAD POSTER</button>
@@ -575,6 +685,11 @@ function Reel() {
           0%,90%,100% { opacity: 0; transform: translateY(0); }
           92% { opacity: 0.5; transform: translateY(60vh); }
           95% { opacity: 0.3; transform: translateY(20vh); }
+        }
+        @keyframes orb-drift {
+          0%,100% { transform: translate(0,0) scale(1); }
+          33% { transform: translate(30px,-20px) scale(1.15); }
+          66% { transform: translate(-25px,15px) scale(0.9); }
         }
       `}</style>
     </div>

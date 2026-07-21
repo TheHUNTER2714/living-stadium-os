@@ -1,24 +1,41 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { speak, cancelSpeech } from "@/lib/voice";
+import { loadPassport } from "@/lib/passport";
+import { LANGUAGES } from "@/data/i18n";
 
 export const Route = createFileRoute("/ar")({
   head: () => ({ meta: [{ title: "AR Wayfinding · StadiumOS AI" }] }),
   component: AR,
 });
 
-const DESTINATIONS = [
-  { id: "seat", label: "My Seat", detail: "Row 22 · Seat 14 · 90m", dir: 12 },
-  { id: "food", label: "Food Court", detail: "Level 2 · 60m", dir: -35 },
-  { id: "washroom", label: "Accessible Washroom", detail: "Sector B · 40m", dir: 45 },
-  { id: "exit", label: "Nearest Exit", detail: "North Gate · 110m", dir: 180 },
-  { id: "medical", label: "Medical Post", detail: "Level 1 · 70m", dir: -80 },
+type Waypoint = { id: string; label: string; detail: string; dir: number; distance: number; icon: string; custom?: boolean };
+
+const DEFAULT_WAYPOINTS: Waypoint[] = [
+  { id: "seat", label: "My Seat", detail: "Row 22 · Seat 14", dir: 12, distance: 90, icon: "🎟" },
+  { id: "food", label: "Food Court", detail: "Level 2", dir: -35, distance: 60, icon: "🍔" },
+  { id: "washroom", label: "Accessible WC", detail: "Sector B", dir: 45, distance: 40, icon: "♿" },
+  { id: "exit", label: "Nearest Exit", detail: "North Gate", dir: 180, distance: 110, icon: "🚪" },
+  { id: "medical", label: "Medical Post", detail: "Level 1", dir: -80, distance: 70, icon: "⛑" },
 ];
 
 function AR() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [dest, setDest] = useState(DESTINATIONS[0]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>(DEFAULT_WAYPOINTS);
+  const [destId, setDestId] = useState<string>(DEFAULT_WAYPOINTS[0].id);
   const [status, setStatus] = useState<"idle" | "loading" | "on" | "denied">("idle");
   const [distance, setDistance] = useState(90);
+  const [heading, setHeading] = useState(12);
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchAvail, setTorchAvail] = useState(false);
+  const [voiceOn, setVoiceOn] = useState(true);
+  const lastAnnouncedRef = useRef<number>(1e9);
+
+  const passport = typeof window !== "undefined" ? loadPassport() : null;
+  const lang = LANGUAGES.find((l) => l.code === (passport?.lang ?? "en")) ?? LANGUAGES[0];
+
+  const dest = waypoints.find((w) => w.id === destId) ?? waypoints[0];
 
   const start = async () => {
     setStatus("loading");
@@ -27,32 +44,100 @@ function AR() {
         video: { facingMode: { ideal: "environment" } },
         audio: false,
       });
+      streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
+      // Detect torch capability
+      const track = stream.getVideoTracks()[0];
+      const caps = (track.getCapabilities?.() ?? {}) as { torch?: boolean };
+      setTorchAvail(!!caps.torch);
       setStatus("on");
     } catch {
       setStatus("denied");
     }
   };
 
+  const toggleTorch = async () => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    try {
+      const next = !torchOn;
+      await track.applyConstraints({ advanced: [{ torch: next } as unknown as MediaTrackConstraintSet] });
+      setTorchOn(next);
+    } catch {
+      setTorchAvail(false);
+    }
+  };
+
+  // Compass heading
   useEffect(() => {
-    return () => {
-      const s = videoRef.current?.srcObject as MediaStream | null;
-      s?.getTracks().forEach((t) => t.stop());
+    const onOrient = (e: DeviceOrientationEvent) => {
+      const alpha = (e as DeviceOrientationEvent & { webkitCompassHeading?: number }).webkitCompassHeading ?? e.alpha;
+      if (typeof alpha === "number") setHeading(Math.round(alpha));
     };
+    window.addEventListener("deviceorientation", onOrient, true);
+    return () => window.removeEventListener("deviceorientation", onOrient, true);
   }, []);
 
   useEffect(() => {
-    setDistance(parseInt(dest.detail.match(/(\d+)m/)?.[1] ?? "90"));
-    const i = setInterval(() => setDistance((d) => Math.max(2, d - 1)), 800);
+    return () => {
+      cancelSpeech();
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
+
+  // Reset distance when destination changes; announce
+  useEffect(() => {
+    if (!dest) return;
+    setDistance(dest.distance);
+    lastAnnouncedRef.current = 1e9;
+    if (voiceOn) speak(`Guiding you to ${dest.label}, ${dest.distance} metres. Follow the arrow.`, lang.voice);
+  }, [destId, dest, voiceOn, lang.voice]);
+
+  // Tick distance down (simulated walking) + voice announcements at 50/20/5m
+  useEffect(() => {
+    const i = setInterval(() => setDistance((d) => Math.max(0, d - 1)), 700);
     return () => clearInterval(i);
   }, [dest]);
 
+  useEffect(() => {
+    if (!voiceOn) return;
+    const checkpoints = [50, 20, 5, 0];
+    for (const c of checkpoints) {
+      if (lastAnnouncedRef.current > c && distance <= c) {
+        lastAnnouncedRef.current = c;
+        if (c === 0) speak(`You have arrived at ${dest.label}.`, lang.voice);
+        else speak(`${c} metres to ${dest.label}.`, lang.voice);
+        break;
+      }
+    }
+  }, [distance, dest, voiceOn, lang.voice]);
+
+  const dropPin = () => {
+    const id = `pin-${Date.now()}`;
+    const dir = Math.round((Math.random() - 0.5) * 300);
+    const distance = 30 + Math.round(Math.random() * 80);
+    const label = `Waypoint ${waypoints.filter((w) => w.custom).length + 1}`;
+    const pin: Waypoint = { id, label, detail: `Dropped pin · ${distance}m`, dir, distance, icon: "📍", custom: true };
+    setWaypoints((w) => [...w, pin]);
+    setDestId(id);
+    if (voiceOn) speak(`New waypoint dropped. Navigating.`, lang.voice);
+  };
+
+  const removePin = () => {
+    if (!dest.custom) return;
+    setWaypoints((w) => w.filter((x) => x.id !== dest.id));
+    setDestId(DEFAULT_WAYPOINTS[0].id);
+  };
+
+  // Arrow rotates by dir minus heading offset (0° = north)
+  const arrowRotation = dest.dir - (heading - 12);
+  const eta = Math.max(1, Math.round(distance / 1.4 / 60));
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
-      {/* Camera feed or fallback */}
       {status === "on" ? (
         <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover" />
       ) : (
@@ -60,58 +145,90 @@ function AR() {
       )}
       <div className="absolute inset-0 bg-black/30" />
 
-      {/* Top bar */}
       <header className="relative z-20 h-14 bg-black/70 backdrop-blur border-b border-white/10 px-4 flex items-center justify-between">
-        <Link to="/dashboard" className="text-xs font-mono text-white/70 hover:text-neon-cyan flex items-center gap-2">
-          ← COMMAND
-        </Link>
+        <Link to="/dashboard" className="text-xs font-mono text-white/70 hover:text-neon-cyan">← COMMAND</Link>
         <div className="flex items-center gap-2 px-3 py-1 bg-black/60 rounded-full border border-neon-cyan/40">
-          <span
-            className={`size-1.5 rounded-full ${status === "on" ? "bg-neon-green animate-pulse" : "bg-white/40"}`}
-          />
+          <span className={`size-1.5 rounded-full ${status === "on" ? "bg-neon-green animate-pulse" : "bg-white/40"}`} />
           <span className="font-mono text-[10px] uppercase tracking-widest text-neon-cyan">
             AR WAYFINDING {status === "on" ? "· ACTIVE" : ""}
           </span>
         </div>
-        <div className="font-mono text-[10px] text-white/50">HEADING · N 12°</div>
+        <div className="font-mono text-[10px] text-white/70 tabular-nums">HEADING · {heading}°</div>
       </header>
 
-      {/* AR overlay */}
       {status === "on" && (
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center pointer-events-none">
-          {/* Reticle */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-64 h-64 border border-neon-cyan/40 rounded-full" style={{ animation: "pulse-glow 2s ease-in-out infinite" }} />
             <div className="absolute w-8 h-px bg-neon-cyan/60" />
             <div className="absolute w-px h-8 bg-neon-cyan/60" />
           </div>
 
-          {/* Directional arrow */}
-          <div
-            className="absolute top-1/2 left-1/2"
-            style={{ transform: `translate(-50%, -50%) rotate(${dest.dir}deg) translateY(-140px)` }}
-          >
-            <div className="flex flex-col items-center">
-              <div className="text-6xl text-neon-cyan drop-shadow-[0_0_20px_rgba(34,211,238,0.9)]" style={{ animation: "pulse-glow 1.2s ease-in-out infinite" }}>
-                ↑
-              </div>
+          <div className="absolute top-1/2 left-1/2 transition-transform duration-300"
+            style={{ transform: `translate(-50%, -50%) rotate(${arrowRotation}deg) translateY(-140px)` }}>
+            <div className="text-6xl text-neon-cyan drop-shadow-[0_0_20px_rgba(34,211,238,0.9)]"
+              style={{ animation: "pulse-glow 1.2s ease-in-out infinite" }}>↑</div>
+            <div className="mt-1 text-center font-mono text-[10px] text-neon-cyan bg-black/70 px-2 py-0.5 rounded">
+              {dest.icon} {dest.label}
             </div>
           </div>
 
           {/* Path pulses */}
           <div className="absolute inset-x-0 bottom-40 flex flex-col items-center gap-3">
             {[0.4, 0.6, 0.8, 1].map((s, i) => (
-              <div
-                key={i}
-                className="w-16 h-2 rounded-full bg-neon-cyan/60 shadow-[0_0_15px_#22d3ee]"
-                style={{ opacity: s, animation: `pulse-glow 1.8s ease-in-out ${i * 0.15}s infinite` }}
-              />
+              <div key={i} className="w-16 h-2 rounded-full bg-neon-cyan/60 shadow-[0_0_15px_#22d3ee]"
+                style={{ opacity: s, animation: `pulse-glow 1.8s ease-in-out ${i * 0.15}s infinite` }} />
             ))}
+          </div>
+
+          {/* Mini radar */}
+          <div className="absolute top-4 left-4 size-32 rounded-full bg-black/60 border border-neon-cyan/40 backdrop-blur overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="size-full rounded-full"
+                style={{ background: "radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 70%)" }} />
+              <div className="absolute size-full origin-center" style={{ animation: "radar-sweep 3s linear infinite" }}>
+                <div className="absolute top-1/2 left-1/2 w-1/2 h-px bg-gradient-to-r from-neon-cyan to-transparent origin-left" />
+              </div>
+              {/* Waypoint dots */}
+              {waypoints.map((w) => {
+                const rad = ((w.dir - (heading - 12)) - 90) * Math.PI / 180;
+                const r = Math.min(0.9, w.distance / 140);
+                const x = 50 + Math.cos(rad) * 42 * r;
+                const y = 50 + Math.sin(rad) * 42 * r;
+                return (
+                  <div key={w.id} className="absolute -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: `${x}%`, top: `${y}%` }}>
+                    <div className={`size-2 rounded-full ${w.id === destId ? "bg-neon-gold shadow-[0_0_10px_#fbbf24]" : "bg-neon-cyan/80"}`} />
+                  </div>
+                );
+              })}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-2 bg-white rounded-full ring-2 ring-neon-cyan" />
+            </div>
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 font-mono text-[8px] text-neon-cyan">RADAR · 140m</div>
+          </div>
+
+          {/* Right-side controls */}
+          <div className="absolute top-4 right-4 flex flex-col gap-2 pointer-events-auto">
+            <button onClick={() => setVoiceOn((v) => { if (v) cancelSpeech(); return !v; })}
+              className={`size-11 rounded-full backdrop-blur border font-mono text-lg ${voiceOn ? "bg-neon-cyan/20 border-neon-cyan text-neon-cyan" : "bg-black/60 border-white/20 text-white/50"}`}
+              title="Voice guidance">🔊</button>
+            {torchAvail && (
+              <button onClick={toggleTorch}
+                className={`size-11 rounded-full backdrop-blur border font-mono text-lg ${torchOn ? "bg-neon-gold/30 border-neon-gold text-neon-gold" : "bg-black/60 border-white/20 text-white/60"}`}
+                title="Torch">🔦</button>
+            )}
+            <button onClick={dropPin}
+              className="size-11 rounded-full bg-black/60 backdrop-blur border border-white/20 text-white/70 font-mono text-lg hover:border-neon-cyan"
+              title="Drop waypoint">📍</button>
+            {dest.custom && (
+              <button onClick={removePin}
+                className="size-11 rounded-full bg-neon-alert/20 backdrop-blur border border-neon-alert text-neon-alert font-mono text-lg"
+                title="Remove pin">✕</button>
+            )}
           </div>
         </div>
       )}
 
-      {/* Bottom card */}
       <div className="relative z-20 p-4 space-y-3">
         {status !== "on" && (
           <div className="glass-panel p-6 text-center max-w-md mx-auto">
@@ -119,13 +236,10 @@ function AR() {
             <p className="text-sm text-white/70 mb-5">
               {status === "denied"
                 ? "Camera permission was denied. Enable it in your browser to see holographic guidance."
-                : "Point your camera at the stadium to see holographic arrows guiding you to any destination."}
+                : "Point your camera at the stadium for holographic arrows, live compass, mini-radar, torch, and dropped waypoints."}
             </p>
-            <button
-              onClick={start}
-              disabled={status === "loading"}
-              className="px-8 py-3 bg-neon-cyan text-black font-display tracking-widest text-sm rounded shadow-[0_0_30px_rgba(34,211,238,0.4)] hover:brightness-110 disabled:opacity-50"
-            >
+            <button onClick={start} disabled={status === "loading"}
+              className="px-8 py-3 bg-neon-cyan text-black font-display tracking-widest text-sm rounded shadow-[0_0_30px_rgba(34,211,238,0.4)] hover:brightness-110 disabled:opacity-50">
               {status === "loading" ? "STARTING CAMERA..." : "ACTIVATE CAMERA"}
             </button>
           </div>
@@ -135,32 +249,31 @@ function AR() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-[10px] font-mono text-white/40 uppercase">Navigating to</div>
-              <div className="font-display text-xl tracking-wide text-neon-cyan">{dest.label}</div>
+              <div className="font-display text-xl tracking-wide text-neon-cyan">{dest.icon} {dest.label}</div>
               <div className="text-xs text-white/60">{dest.detail}</div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] font-mono text-white/40 uppercase">Distance</div>
+              <div className="text-[10px] font-mono text-white/40 uppercase">Distance · ETA</div>
               <div className="font-display text-2xl text-neon-gold tabular-nums">{distance}m</div>
-              <div className="text-[10px] font-mono text-neon-green">ETA · {Math.max(1, Math.round(distance / 1.4 / 60))}min</div>
+              <div className="text-[10px] font-mono text-neon-green">{eta} min · voice {voiceOn ? "on" : "off"}</div>
             </div>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {DESTINATIONS.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => setDest(d)}
+            {waypoints.map((d) => (
+              <button key={d.id} onClick={() => setDestId(d.id)}
                 className={`px-3 py-2 rounded-lg text-[11px] font-medium whitespace-nowrap border transition ${
-                  dest.id === d.id
-                    ? "bg-neon-cyan text-black border-neon-cyan"
-                    : "bg-white/5 border-white/10 text-white/70 hover:border-neon-cyan/50 hover:text-white"
-                }`}
-              >
-                {d.label}
+                  destId === d.id ? "bg-neon-cyan text-black border-neon-cyan" : "bg-white/5 border-white/10 text-white/70 hover:border-neon-cyan/50 hover:text-white"
+                }`}>
+                {d.icon} {d.label}
               </button>
             ))}
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes radar-sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }
