@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ALL_TEAMS, getTeam } from "@/data/wc2026";
 import { LANGUAGES } from "@/data/i18n";
 import { loadPassport, savePassport } from "@/lib/passport";
+import { playerAvatar } from "@/lib/player-avatar";
 
 export const Route = createFileRoute("/passport")({
   head: () => ({ meta: [{ title: "Fan Passport · StadiumOS AI" }] }),
@@ -143,15 +144,16 @@ function Passport() {
 
           {team && (
             <Field label={`4 · Your hero from ${team.name}`}>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
                 {team.players.map((p) => (
                   <button key={p.name} onClick={() => setFavoritePlayer(p.name)}
-                    className={`text-left px-3 py-2 rounded border transition ${favoritePlayer === p.name ? "border-neon-gold bg-neon-gold/10" : "border-white/10 bg-black/30 hover:border-white/30"}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[9px] text-white/40">#{p.no} · {p.pos}</span>
+                    className={`flex gap-2 p-2 rounded border transition text-left ${favoritePlayer === p.name ? "border-neon-gold bg-neon-gold/10" : "border-white/10 bg-black/30 hover:border-white/30"}`}>
+                    <img src={playerAvatar(p, team)} alt={p.name} className="size-14 rounded shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-mono text-[9px] text-white/40">#{p.no} · {p.pos}</div>
+                      <div className="font-display tracking-wide text-sm truncate">{p.name}</div>
+                      {p.club && <div className="font-mono text-[9px] text-white/40 truncate">{p.club}</div>}
                     </div>
-                    <div className="font-display tracking-wide text-sm truncate">{p.name}</div>
-                    {p.club && <div className="font-mono text-[9px] text-white/40 truncate">{p.club}</div>}
                   </button>
                 ))}
               </div>
