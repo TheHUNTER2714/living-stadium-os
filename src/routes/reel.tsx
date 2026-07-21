@@ -7,6 +7,8 @@ import stadiumTwin from "@/assets/stadium-twin.jpg";
 import { getTeam } from "@/data/wc2026";
 import { loadPassport } from "@/lib/passport";
 import { createFunkLoop, type FunkHandle } from "@/lib/funk-audio";
+import { createReelSFX, type SFXHandle } from "@/lib/reel-sfx";
+import { playerAvatar } from "@/lib/player-avatar";
 
 export const Route = createFileRoute("/reel")({
   head: () => ({ meta: [{ title: "Highlight Reel · StadiumOS AI" }] }),
@@ -36,6 +38,10 @@ function Reel() {
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [uploadType, setUploadType] = useState<"video" | "image" | null>(null);
   const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(0.7);
+  const [sfxOn, setSfxOn] = useState(true);
+  const [customTrackName, setCustomTrackName] = useState<string | null>(null);
+  const customFileRef = useRef<File | null>(null);
 
   const [buildStep, setBuildStep] = useState(0);
   const [scene, setScene] = useState(0);
@@ -44,9 +50,9 @@ function Reel() {
   const rafRef = useRef<number | null>(null);
   const startedAt = useRef<number>(0);
   const funkRef = useRef<FunkHandle | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const sfxRef = useRef<SFXHandle | null>(null);
+  const customSrcRef = useRef<AudioBufferSourceNode | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Build scenes dynamically from team + player + upload
   const SCENES = useMemo(() => {
@@ -125,25 +131,56 @@ function Reel() {
     setBuildStep(0);
   };
 
+  const stopAudio = () => {
+    try { customSrcRef.current?.stop(); } catch {}
+    customSrcRef.current = null;
+    funkRef.current?.stop();
+    funkRef.current = null;
+    sfxRef.current?.stopAll();
+    sfxRef.current?.destroy();
+    sfxRef.current = null;
+  };
+
+  const startPlayback = async () => {
+    setPhase("playing");
+    setScene(0);
+    setProgress(0);
+    startedAt.current = performance.now();
+    if (muted) return;
+    // Set up SFX engine (handles style cues + custom track)
+    const sfx = createReelSFX(style);
+    sfx.setVolume(volume);
+    sfxRef.current = sfx;
+    // Custom uploaded track wins over funk
+    if (customFileRef.current) {
+      try {
+        const buf = await sfx.loadFile(customFileRef.current);
+        const src = sfx.playCustom(buf, true);
+        customSrcRef.current = src;
+      } catch {
+        // fall back
+        if (style === "funk") { funkRef.current = createFunkLoop({ bpm: 110 }); funkRef.current.start(); }
+      }
+    } else if (style === "funk") {
+      funkRef.current = createFunkLoop({ bpm: 110 });
+      funkRef.current.start();
+      funkRef.current.setVolume(volume * 0.7);
+    }
+    // Fire opening cue
+    if (sfxOn) setTimeout(() => sfxRef.current?.playCue(style === "cinematic" ? "swell" : "scene"), 120);
+  };
+
   // Building sequence
   useEffect(() => {
     if (phase !== "building") return;
     if (buildStep >= BUILD_STEPS.length) {
-      const t = setTimeout(() => {
-        setPhase("playing");
-        setScene(0);
-        setProgress(0);
-        startedAt.current = performance.now();
-        if (style === "funk" && !muted) {
-          funkRef.current = createFunkLoop({ bpm: 110 });
-          funkRef.current.start();
-        }
-      }, 500);
+      const t = setTimeout(() => { void startPlayback(); }, 500);
       return () => clearTimeout(t);
     }
     const t = setTimeout(() => setBuildStep((s) => s + 1), 600);
     return () => clearTimeout(t);
-  }, [phase, buildStep, BUILD_STEPS.length, style, muted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, buildStep, BUILD_STEPS.length]);
 
   // Playback loop
   useEffect(() => {
@@ -155,20 +192,27 @@ function Reel() {
       const s = Math.min(SCENES.length - 1, Math.floor(elapsed / SCENE_MS));
       setScene(s);
       if (p < 1) rafRef.current = requestAnimationFrame(loop);
-      else {
-        setPhase("done");
-        funkRef.current?.stop();
-        funkRef.current = null;
-      }
+      else { setPhase("done"); stopAudio(); }
     };
     rafRef.current = requestAnimationFrame(loop);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, TOTAL_MS, SCENE_MS, SCENES.length]);
 
+  // Scene-change SFX cue
+  useEffect(() => {
+    if (phase !== "playing" || !sfxOn || muted) return;
+    sfxRef.current?.playCue("scene");
+  }, [scene, phase, sfxOn, muted]);
+
+  // Live volume changes
+  useEffect(() => {
+    sfxRef.current?.setVolume(volume);
+    funkRef.current?.setVolume(volume * 0.7);
+  }, [volume]);
+
   // Cleanup
-  useEffect(() => () => { funkRef.current?.stop(); }, []);
+  useEffect(() => () => { stopAudio(); }, []);
 
   // "Download" — render stage to canvas snapshot as PNG poster + JSON manifest
   const downloadPoster = async () => {
