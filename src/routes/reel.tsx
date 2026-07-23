@@ -46,13 +46,20 @@ function Reel() {
   const [buildStep, setBuildStep] = useState(0);
   const [scene, setScene] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [autoLoop, setAutoLoop] = useState(false);
 
   const rafRef = useRef<number | null>(null);
   const startedAt = useRef<number>(0);
+  const elapsedRef = useRef<number>(0);
+  const lastFrameRef = useRef<number>(0);
+  const pausedRef = useRef<boolean>(false);
+  const autoLoopRef = useRef<boolean>(false);
   const funkRef = useRef<FunkHandle | null>(null);
   const sfxRef = useRef<SFXHandle | null>(null);
   const customSrcRef = useRef<AudioBufferSourceNode | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+
 
   // Build scenes dynamically from team + player + upload
   const SCENES = useMemo(() => {
