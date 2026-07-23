@@ -54,6 +54,7 @@ export function FastHelp() {
   }, []);
 
   const tips = ROUTE_TIPS[route] ?? ROUTE_TIPS["/"];
+  if (route === "/") return null;
 
   return (
     <>
