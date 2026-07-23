@@ -463,11 +463,9 @@ function Reel() {
                 <Section title={`4 · Hero from ${team.flag} ${team.name}`}>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-52 overflow-y-auto pr-1">
                     {team.players.map((p) => (
-                      <button key={p.name} onClick={() => setPlayer(p.name)}
-                        className={`text-left px-3 py-2 rounded border transition ${player === p.name ? "border-neon-gold bg-neon-gold/10" : "border-white/10 bg-black/30 hover:border-white/30"}`}>
-                        <div className="font-mono text-[9px] text-white/40">#{p.no} · {p.pos}</div>
-                        <div className="font-display tracking-wide text-sm truncate">{p.name}</div>
-                      </button>
+                      <ReelPlayerButton key={p.name} player={p} team={team}
+                        selected={player === p.name}
+                        onPick={() => setPlayer(p.name)} />
                     ))}
                   </div>
                 </Section>
@@ -693,17 +691,7 @@ function Reel() {
           {(() => {
             const heroPlayer = team?.players.find((p) => p.name === player);
             if (!heroPlayer) return null;
-            return (
-              <div key={scene} className="absolute top-6 right-6 z-20 flex items-center gap-3 bg-black/60 backdrop-blur border border-neon-gold/50 rounded-xl p-2 pr-4"
-                style={{ animation: "slide-up-fade 500ms ease-out both" }}>
-                <img src={playerAvatar(heroPlayer, team)} alt={heroPlayer.name} className="size-12 rounded-lg shadow-[0_0_20px_rgba(251,191,36,0.4)]" />
-                <div>
-                  <div className="font-mono text-[9px] text-neon-gold uppercase tracking-widest">#{heroPlayer.no} · {heroPlayer.pos}</div>
-                  <div className="font-display tracking-wide text-white text-sm leading-tight">{heroPlayer.name}</div>
-                  <div className="font-mono text-[9px] text-white/50">{team!.flag} {team!.name}</div>
-                </div>
-              </div>
-            );
+            return <HeroChip key={scene} player={heroPlayer} team={team!} sceneKey={scene} />;
           })()}
 
           {/* Corner brackets */}
