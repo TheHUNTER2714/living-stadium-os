@@ -46,13 +46,20 @@ function Reel() {
   const [buildStep, setBuildStep] = useState(0);
   const [scene, setScene] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [autoLoop, setAutoLoop] = useState(false);
 
   const rafRef = useRef<number | null>(null);
   const startedAt = useRef<number>(0);
+  const elapsedRef = useRef<number>(0);
+  const lastFrameRef = useRef<number>(0);
+  const pausedRef = useRef<boolean>(false);
+  const autoLoopRef = useRef<boolean>(false);
   const funkRef = useRef<FunkHandle | null>(null);
   const sfxRef = useRef<SFXHandle | null>(null);
   const customSrcRef = useRef<AudioBufferSourceNode | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+
 
   // Build scenes dynamically from team + player + upload
   const SCENES = useMemo(() => {
@@ -145,6 +152,10 @@ function Reel() {
     setPhase("playing");
     setScene(0);
     setProgress(0);
+    setPaused(false);
+    pausedRef.current = false;
+    elapsedRef.current = 0;
+    lastFrameRef.current = performance.now();
     startedAt.current = performance.now();
     if (muted) return;
     // Set up SFX engine (handles style cues + custom track)
@@ -170,6 +181,29 @@ function Reel() {
     if (sfxOn) setTimeout(() => sfxRef.current?.playCue(style === "cinematic" ? "swell" : "scene"), 120);
   };
 
+  const togglePause = () => {
+    setPaused((p) => {
+      const next = !p;
+      pausedRef.current = next;
+      if (next) {
+        try { customSrcRef.current?.stop(); } catch {}
+        customSrcRef.current = null;
+        funkRef.current?.stop();
+        funkRef.current = null;
+      }
+      lastFrameRef.current = performance.now();
+      return next;
+    });
+  };
+
+  const skipScene = (dir: -1 | 1) => {
+    const target = Math.max(0, Math.min(SCENES.length - 1, scene + dir));
+    elapsedRef.current = target * SCENE_MS;
+    setScene(target);
+    setProgress(elapsedRef.current / TOTAL_MS);
+    if (sfxOn && !muted) sfxRef.current?.playCue("scene");
+  };
+
   // Building sequence
   useEffect(() => {
     if (phase !== "building") return;
@@ -182,28 +216,58 @@ function Reel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, buildStep, BUILD_STEPS.length]);
 
-  // Playback loop
+  // Playback loop — delta-based so pause works
   useEffect(() => {
     if (phase !== "playing") return;
+    lastFrameRef.current = performance.now();
     const loop = () => {
-      const elapsed = performance.now() - startedAt.current;
-      const p = Math.min(1, elapsed / TOTAL_MS);
+      const now = performance.now();
+      const dt = now - lastFrameRef.current;
+      lastFrameRef.current = now;
+      if (!pausedRef.current) elapsedRef.current += dt;
+      const p = Math.min(1, elapsedRef.current / TOTAL_MS);
       setProgress(p);
-      const s = Math.min(SCENES.length - 1, Math.floor(elapsed / SCENE_MS));
+      const s = Math.min(SCENES.length - 1, Math.floor(elapsedRef.current / SCENE_MS));
       setScene(s);
       if (p < 1) rafRef.current = requestAnimationFrame(loop);
-      else { setPhase("done"); stopAudio(); }
+      else {
+        if (autoLoopRef.current) {
+          elapsedRef.current = 0;
+          rafRef.current = requestAnimationFrame(loop);
+        } else {
+          setPhase("done");
+          stopAudio();
+        }
+      }
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, TOTAL_MS, SCENE_MS, SCENES.length]);
 
+  useEffect(() => { autoLoopRef.current = autoLoop; }, [autoLoop]);
+
   // Scene-change SFX cue
   useEffect(() => {
-    if (phase !== "playing" || !sfxOn || muted) return;
+    if (phase !== "playing" || !sfxOn || muted || pausedRef.current) return;
     sfxRef.current?.playCue("scene");
   }, [scene, phase, sfxOn, muted]);
+
+  // Keyboard shortcuts during playback: Space = pause, ←/→ = scene skip
+  useEffect(() => {
+    if (phase !== "playing" && phase !== "done") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target && (e.target as HTMLElement).tagName === "INPUT") return;
+      if (e.code === "Space") { e.preventDefault(); if (phase === "playing") togglePause(); }
+      else if (e.code === "ArrowRight" && phase === "playing") skipScene(1);
+      else if (e.code === "ArrowLeft" && phase === "playing") skipScene(-1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, scene]);
+
+
 
   // Live volume changes
   useEffect(() => {
@@ -311,9 +375,30 @@ function Reel() {
 
       {/* CONFIG */}
       {phase === "config" && (
-        <div className="flex-1 p-6 overflow-y-auto">
-          <div className="max-w-6xl mx-auto grid grid-cols-12 gap-6">
+        <div className="flex-1 p-6 overflow-y-auto relative">
+          {/* Animated stadium background */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <img src={stadiumTwin} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20"
+              style={{ animation: "reel-bg-pan 30s ease-in-out infinite alternate" }} />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black" />
+            <div className="absolute inset-0 opacity-[0.05]"
+              style={{ backgroundImage: "linear-gradient(rgba(34,211,238,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.6) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+            {Array.from({ length: 14 }).map((_, i) => (
+              <div key={i} className="absolute rounded-full blur-3xl opacity-30"
+                style={{
+                  left: `${(i * 71) % 100}%`, top: `${(i * 43) % 100}%`,
+                  width: 80 + (i % 5) * 40, height: 80 + (i % 5) * 40,
+                  background: [team?.color ?? "#22d3ee", team?.accent ?? "#fbbf24", "#f43f5e"][i % 3],
+                  animation: `orb-drift ${10 + (i % 5) * 2}s ease-in-out ${i * 0.4}s infinite`,
+                }} />
+            ))}
+            <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[70%] h-[60%]"
+              style={{ background: "radial-gradient(ellipse at center top, rgba(34,211,238,0.25), transparent 65%)" }} />
+          </div>
+
+          <div className="max-w-6xl mx-auto grid grid-cols-12 gap-6 relative z-10">
             <div className="col-span-12 lg:col-span-7">
+
               <div className="inline-block px-3 py-1 rounded-full border border-neon-gold/40 bg-neon-gold/10 text-neon-gold text-[10px] font-mono uppercase tracking-widest mb-4">
                 One-Click · AI Directed · FIFA WC 2026
               </div>
@@ -434,6 +519,15 @@ function Reel() {
                       </span>
                     </span>
                   </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={autoLoop} onChange={(e) => setAutoLoop(e.target.checked)} className="size-4 accent-neon-gold" />
+                    <span className="text-sm">
+                      Auto-loop playback
+                      <span className="block text-[10px] text-white/40 font-mono">Reel restarts automatically — perfect for kiosks & watch parties</span>
+                    </span>
+                  </label>
+
                 </div>
               </Section>
 
@@ -626,16 +720,46 @@ function Reel() {
             </div>
           )}
 
-          {/* Progress bar */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/4 max-w-2xl z-20">
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-[10px] text-white/60 tabular-nums">{formatTime(progress * (TOTAL_MS / 1000))}</span>
-              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-neon-cyan to-neon-gold" style={{ width: `${progress * 100}%` }} />
+          {/* Playback controls + progress bar */}
+          {phase === "playing" && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-11/12 max-w-3xl z-20 flex flex-col gap-2">
+              <div className="flex items-center justify-center gap-2">
+                <button onClick={() => skipScene(-1)} title="Previous scene (←)"
+                  className="size-9 rounded-full bg-black/60 backdrop-blur border border-white/20 hover:border-neon-cyan hover:text-neon-cyan text-white/80 font-mono text-sm transition">⏮</button>
+                <button onClick={togglePause} title="Pause / Resume (Space)"
+                  className="size-11 rounded-full bg-neon-cyan text-black font-mono text-lg shadow-[0_0_20px_rgba(34,211,238,0.5)] hover:scale-110 transition">
+                  {paused ? "▶" : "❚❚"}
+                </button>
+                <button onClick={() => skipScene(1)} title="Next scene (→)"
+                  className="size-9 rounded-full bg-black/60 backdrop-blur border border-white/20 hover:border-neon-cyan hover:text-neon-cyan text-white/80 font-mono text-sm transition">⏭</button>
+                <button onClick={() => setMuted((m) => { const n = !m; if (n) { try { customSrcRef.current?.stop(); } catch {} funkRef.current?.stop(); sfxRef.current?.setVolume(0); } else { sfxRef.current?.setVolume(volume); } return n; })}
+                  title="Mute / Unmute"
+                  className="size-9 rounded-full bg-black/60 backdrop-blur border border-white/20 hover:border-neon-gold hover:text-neon-gold text-white/80 font-mono text-sm transition">
+                  {muted ? "🔇" : "🔊"}
+                </button>
+                <button onClick={() => setAutoLoop((l) => { autoLoopRef.current = !l; return !l; })}
+                  title="Auto-loop"
+                  className={`h-9 px-3 rounded-full backdrop-blur border font-mono text-[10px] tracking-widest transition ${autoLoop ? "bg-neon-gold/20 border-neon-gold text-neon-gold" : "bg-black/60 border-white/20 text-white/60 hover:border-neon-gold/50"}`}>
+                  LOOP {autoLoop ? "ON" : "OFF"}
+                </button>
               </div>
-              <span className="font-mono text-[10px] text-white/60 tabular-nums">{formatTime(TOTAL_MS / 1000)}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-[10px] text-white/60 tabular-nums">{formatTime(progress * (TOTAL_MS / 1000))}</span>
+                <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer"
+                  onClick={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    const p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+                    elapsedRef.current = p * TOTAL_MS;
+                    setProgress(p);
+                  }}>
+                  <div className="h-full bg-gradient-to-r from-neon-cyan to-neon-gold" style={{ width: `${progress * 100}%` }} />
+                </div>
+                <span className="font-mono text-[10px] text-white/60 tabular-nums">{formatTime(TOTAL_MS / 1000)}</span>
+              </div>
+              <div className="text-center text-[9px] font-mono text-white/30 tracking-widest">SPACE PAUSE · ← → SCENE · CLICK BAR SCRUB</div>
             </div>
-          </div>
+          )}
+
 
           {phase === "done" && (
             <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur">
@@ -691,7 +815,12 @@ function Reel() {
           33% { transform: translate(30px,-20px) scale(1.15); }
           66% { transform: translate(-25px,15px) scale(0.9); }
         }
+        @keyframes reel-bg-pan {
+          0% { transform: scale(1.1) translate(0,0); }
+          100% { transform: scale(1.25) translate(-3%, -2%); }
+        }
       `}</style>
+
     </div>
   );
 }
