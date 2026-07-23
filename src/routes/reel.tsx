@@ -375,9 +375,30 @@ function Reel() {
 
       {/* CONFIG */}
       {phase === "config" && (
-        <div className="flex-1 p-6 overflow-y-auto">
-          <div className="max-w-6xl mx-auto grid grid-cols-12 gap-6">
+        <div className="flex-1 p-6 overflow-y-auto relative">
+          {/* Animated stadium background */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <img src={stadiumTwin} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20"
+              style={{ animation: "reel-bg-pan 30s ease-in-out infinite alternate" }} />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black" />
+            <div className="absolute inset-0 opacity-[0.05]"
+              style={{ backgroundImage: "linear-gradient(rgba(34,211,238,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.6) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+            {Array.from({ length: 14 }).map((_, i) => (
+              <div key={i} className="absolute rounded-full blur-3xl opacity-30"
+                style={{
+                  left: `${(i * 71) % 100}%`, top: `${(i * 43) % 100}%`,
+                  width: 80 + (i % 5) * 40, height: 80 + (i % 5) * 40,
+                  background: [team?.color ?? "#22d3ee", team?.accent ?? "#fbbf24", "#f43f5e"][i % 3],
+                  animation: `orb-drift ${10 + (i % 5) * 2}s ease-in-out ${i * 0.4}s infinite`,
+                }} />
+            ))}
+            <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[70%] h-[60%]"
+              style={{ background: "radial-gradient(ellipse at center top, rgba(34,211,238,0.25), transparent 65%)" }} />
+          </div>
+
+          <div className="max-w-6xl mx-auto grid grid-cols-12 gap-6 relative z-10">
             <div className="col-span-12 lg:col-span-7">
+
               <div className="inline-block px-3 py-1 rounded-full border border-neon-gold/40 bg-neon-gold/10 text-neon-gold text-[10px] font-mono uppercase tracking-widest mb-4">
                 One-Click · AI Directed · FIFA WC 2026
               </div>
