@@ -9,6 +9,7 @@ import { loadPassport } from "@/lib/passport";
 import { createFunkLoop, type FunkHandle } from "@/lib/funk-audio";
 import { createReelSFX, type SFXHandle } from "@/lib/reel-sfx";
 import { playerAvatar } from "@/lib/player-avatar";
+import { usePlayerPhoto } from "@/lib/player-photos";
 
 export const Route = createFileRoute("/reel")({
   head: () => ({ meta: [{ title: "Highlight Reel · StadiumOS AI" }] }),
