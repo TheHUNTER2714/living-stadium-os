@@ -720,16 +720,46 @@ function Reel() {
             </div>
           )}
 
-          {/* Progress bar */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/4 max-w-2xl z-20">
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-[10px] text-white/60 tabular-nums">{formatTime(progress * (TOTAL_MS / 1000))}</span>
-              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-neon-cyan to-neon-gold" style={{ width: `${progress * 100}%` }} />
+          {/* Playback controls + progress bar */}
+          {phase === "playing" && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-11/12 max-w-3xl z-20 flex flex-col gap-2">
+              <div className="flex items-center justify-center gap-2">
+                <button onClick={() => skipScene(-1)} title="Previous scene (←)"
+                  className="size-9 rounded-full bg-black/60 backdrop-blur border border-white/20 hover:border-neon-cyan hover:text-neon-cyan text-white/80 font-mono text-sm transition">⏮</button>
+                <button onClick={togglePause} title="Pause / Resume (Space)"
+                  className="size-11 rounded-full bg-neon-cyan text-black font-mono text-lg shadow-[0_0_20px_rgba(34,211,238,0.5)] hover:scale-110 transition">
+                  {paused ? "▶" : "❚❚"}
+                </button>
+                <button onClick={() => skipScene(1)} title="Next scene (→)"
+                  className="size-9 rounded-full bg-black/60 backdrop-blur border border-white/20 hover:border-neon-cyan hover:text-neon-cyan text-white/80 font-mono text-sm transition">⏭</button>
+                <button onClick={() => setMuted((m) => { const n = !m; if (n) { try { customSrcRef.current?.stop(); } catch {} funkRef.current?.stop(); sfxRef.current?.setVolume(0); } else { sfxRef.current?.setVolume(volume); } return n; })}
+                  title="Mute / Unmute"
+                  className="size-9 rounded-full bg-black/60 backdrop-blur border border-white/20 hover:border-neon-gold hover:text-neon-gold text-white/80 font-mono text-sm transition">
+                  {muted ? "🔇" : "🔊"}
+                </button>
+                <button onClick={() => setAutoLoop((l) => { autoLoopRef.current = !l; return !l; })}
+                  title="Auto-loop"
+                  className={`h-9 px-3 rounded-full backdrop-blur border font-mono text-[10px] tracking-widest transition ${autoLoop ? "bg-neon-gold/20 border-neon-gold text-neon-gold" : "bg-black/60 border-white/20 text-white/60 hover:border-neon-gold/50"}`}>
+                  LOOP {autoLoop ? "ON" : "OFF"}
+                </button>
               </div>
-              <span className="font-mono text-[10px] text-white/60 tabular-nums">{formatTime(TOTAL_MS / 1000)}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-[10px] text-white/60 tabular-nums">{formatTime(progress * (TOTAL_MS / 1000))}</span>
+                <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer"
+                  onClick={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    const p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+                    elapsedRef.current = p * TOTAL_MS;
+                    setProgress(p);
+                  }}>
+                  <div className="h-full bg-gradient-to-r from-neon-cyan to-neon-gold" style={{ width: `${progress * 100}%` }} />
+                </div>
+                <span className="font-mono text-[10px] text-white/60 tabular-nums">{formatTime(TOTAL_MS / 1000)}</span>
+              </div>
+              <div className="text-center text-[9px] font-mono text-white/30 tracking-widest">SPACE PAUSE · ← → SCENE · CLICK BAR SCRUB</div>
             </div>
-          </div>
+          )}
+
 
           {phase === "done" && (
             <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur">
