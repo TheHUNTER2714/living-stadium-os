@@ -815,7 +815,12 @@ function Reel() {
           33% { transform: translate(30px,-20px) scale(1.15); }
           66% { transform: translate(-25px,15px) scale(0.9); }
         }
+        @keyframes reel-bg-pan {
+          0% { transform: scale(1.1) translate(0,0); }
+          100% { transform: scale(1.25) translate(-3%, -2%); }
+        }
       `}</style>
+
     </div>
   );
 }
