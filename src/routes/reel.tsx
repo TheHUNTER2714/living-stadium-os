@@ -253,6 +253,21 @@ function Reel() {
     sfxRef.current?.playCue("scene");
   }, [scene, phase, sfxOn, muted]);
 
+  // Keyboard shortcuts during playback: Space = pause, ←/→ = scene skip
+  useEffect(() => {
+    if (phase !== "playing" && phase !== "done") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target && (e.target as HTMLElement).tagName === "INPUT") return;
+      if (e.code === "Space") { e.preventDefault(); if (phase === "playing") togglePause(); }
+      else if (e.code === "ArrowRight" && phase === "playing") skipScene(1);
+      else if (e.code === "ArrowLeft" && phase === "playing") skipScene(-1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, scene]);
+
+
 
   // Live volume changes
   useEffect(() => {
