@@ -4,6 +4,8 @@ import { ALL_TEAMS, getTeam } from "@/data/wc2026";
 import { LANGUAGES } from "@/data/i18n";
 import { loadPassport, savePassport } from "@/lib/passport";
 import { playerAvatar } from "@/lib/player-avatar";
+import { fileToDataUrl, getPhoto, removePhoto, setPhoto, usePlayerPhoto } from "@/lib/player-photos";
+import { useRef } from "react";
 
 export const Route = createFileRoute("/passport")({
   head: () => ({ meta: [{ title: "Fan Passport · StadiumOS AI" }] }),
