@@ -51,6 +51,7 @@ function Dashboard() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [rulesOpen, setRulesOpen] = useState(false);
   const alertIdRef = useRef(0);
+  const lastRaisedRef = useRef<Record<string, number>>({});
   const [aiThinking, setAiThinking] = useState(false);
   const [aiSpeaking, setAiSpeaking] = useState(false);
 
@@ -87,23 +88,25 @@ function Dashboard() {
     return () => clearInterval(i);
   }, []);
 
-  // Alert rule evaluator
+  // Alert rule evaluator — per-key cooldown (60s) so nothing spams; occupancy is silent (warn).
   useEffect(() => {
     const pct = (occupancy / CAPACITY) * 100;
     const now = new Date().toLocaleTimeString("en-US", { hour12: false }).slice(0, 5);
-    const raise = (severity: Alert["severity"], label: string, key: string) => {
-      setAlerts((prev) => {
-        // debounce: skip if same key raised in last 4
-        if (prev.some((a) => a.label === label)) return prev;
-        const next = [{ id: ++alertIdRef.current, severity, label, ts: now }, ...prev].slice(0, 6);
-        if (severity === "crit" && voiceOut) speak(label, langMeta.voice);
-        return next;
-      });
+    const raise = (severity: Alert["severity"], label: string, key: string, speakIt: boolean) => {
+      const t = Date.now();
+      if ((lastRaisedRef.current[key] ?? 0) + 60000 > t) return;
+      lastRaisedRef.current[key] = t;
+      setAlerts((prev) => [{ id: ++alertIdRef.current, severity, label, ts: now }, ...prev].slice(0, 6));
+      if (speakIt && voiceOut) speak(label, langMeta.voice);
     };
-    if (pct >= rules.occupancyPct) raise("crit", `OCCUPANCY ${pct.toFixed(1)}% ≥ ${rules.occupancyPct}%`, "occ");
-    if (latency >= rules.latencyMs) raise("warn", `LATENCY ${latency}ms ≥ ${rules.latencyMs}ms`, "lat");
-    if (surge >= rules.surgePct) raise("crit", `SURGE ${surge}% ≥ ${rules.surgePct}% — reroute triggered`, "surge");
+    // Occupancy — visible warn, never spoken (was the culprit for the constant chatter)
+    if (pct >= rules.occupancyPct) raise("warn", `OCCUPANCY ${pct.toFixed(1)}% ≥ ${rules.occupancyPct}%`, "occ", false);
+    // Latency — silent warn
+    if (latency >= rules.latencyMs) raise("warn", `LATENCY ${latency}ms ≥ ${rules.latencyMs}ms`, "lat", false);
+    // Surge is the only spoken alert — genuine safety event
+    if (surge >= rules.surgePct) raise("crit", `SURGE ${surge}% ≥ ${rules.surgePct}% — reroute triggered`, "surge", true);
   }, [occupancy, latency, surge, rules, voiceOut, langMeta.voice]);
+
 
   useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [chat]);
 
