@@ -152,6 +152,10 @@ function Reel() {
     setPhase("playing");
     setScene(0);
     setProgress(0);
+    setPaused(false);
+    pausedRef.current = false;
+    elapsedRef.current = 0;
+    lastFrameRef.current = performance.now();
     startedAt.current = performance.now();
     if (muted) return;
     // Set up SFX engine (handles style cues + custom track)
@@ -177,6 +181,29 @@ function Reel() {
     if (sfxOn) setTimeout(() => sfxRef.current?.playCue(style === "cinematic" ? "swell" : "scene"), 120);
   };
 
+  const togglePause = () => {
+    setPaused((p) => {
+      const next = !p;
+      pausedRef.current = next;
+      if (next) {
+        try { customSrcRef.current?.stop(); } catch {}
+        customSrcRef.current = null;
+        funkRef.current?.stop();
+        funkRef.current = null;
+      }
+      lastFrameRef.current = performance.now();
+      return next;
+    });
+  };
+
+  const skipScene = (dir: -1 | 1) => {
+    const target = Math.max(0, Math.min(SCENES.length - 1, scene + dir));
+    elapsedRef.current = target * SCENE_MS;
+    setScene(target);
+    setProgress(elapsedRef.current / TOTAL_MS);
+    if (sfxOn && !muted) sfxRef.current?.playCue("scene");
+  };
+
   // Building sequence
   useEffect(() => {
     if (phase !== "building") return;
@@ -189,28 +216,43 @@ function Reel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, buildStep, BUILD_STEPS.length]);
 
-  // Playback loop
+  // Playback loop — delta-based so pause works
   useEffect(() => {
     if (phase !== "playing") return;
+    lastFrameRef.current = performance.now();
     const loop = () => {
-      const elapsed = performance.now() - startedAt.current;
-      const p = Math.min(1, elapsed / TOTAL_MS);
+      const now = performance.now();
+      const dt = now - lastFrameRef.current;
+      lastFrameRef.current = now;
+      if (!pausedRef.current) elapsedRef.current += dt;
+      const p = Math.min(1, elapsedRef.current / TOTAL_MS);
       setProgress(p);
-      const s = Math.min(SCENES.length - 1, Math.floor(elapsed / SCENE_MS));
+      const s = Math.min(SCENES.length - 1, Math.floor(elapsedRef.current / SCENE_MS));
       setScene(s);
       if (p < 1) rafRef.current = requestAnimationFrame(loop);
-      else { setPhase("done"); stopAudio(); }
+      else {
+        if (autoLoopRef.current) {
+          elapsedRef.current = 0;
+          rafRef.current = requestAnimationFrame(loop);
+        } else {
+          setPhase("done");
+          stopAudio();
+        }
+      }
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, TOTAL_MS, SCENE_MS, SCENES.length]);
 
+  useEffect(() => { autoLoopRef.current = autoLoop; }, [autoLoop]);
+
   // Scene-change SFX cue
   useEffect(() => {
-    if (phase !== "playing" || !sfxOn || muted) return;
+    if (phase !== "playing" || !sfxOn || muted || pausedRef.current) return;
     sfxRef.current?.playCue("scene");
   }, [scene, phase, sfxOn, muted]);
+
 
   // Live volume changes
   useEffect(() => {
