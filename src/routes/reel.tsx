@@ -832,3 +832,37 @@ function formatTime(s: number) {
   const sec = Math.floor(s % 60);
   return `${m}:${sec.toString().padStart(2, "0")}`;
 }
+
+function ReelPlayerButton({ player, team, selected, onPick }:
+  { player: import("@/data/wc2026").Player; team: import("@/data/wc2026").Team; selected: boolean; onPick: () => void }) {
+  const photo = usePlayerPhoto(player.name);
+  const src = photo || playerAvatar(player, team);
+  return (
+    <button onClick={onPick}
+      className={`text-left px-2 py-2 rounded border transition flex gap-2 items-center ${selected ? "border-neon-gold bg-neon-gold/10" : "border-white/10 bg-black/30 hover:border-white/30"}`}>
+      <img src={src} alt={player.name} className="size-10 rounded object-cover shrink-0" />
+      <div className="min-w-0">
+        <div className="font-mono text-[9px] text-white/40">#{player.no} · {player.pos}{photo ? " · 📷" : ""}</div>
+        <div className="font-display tracking-wide text-sm truncate">{player.name}</div>
+      </div>
+    </button>
+  );
+}
+
+function HeroChip({ player, team, sceneKey }:
+  { player: import("@/data/wc2026").Player; team: import("@/data/wc2026").Team; sceneKey: number }) {
+  const photo = usePlayerPhoto(player.name);
+  const src = photo || playerAvatar(player, team);
+  return (
+    <div key={sceneKey} className="absolute top-6 right-6 z-20 flex items-center gap-3 bg-black/60 backdrop-blur border border-neon-gold/50 rounded-xl p-2 pr-4"
+      style={{ animation: "slide-up-fade 500ms ease-out both" }}>
+      <img src={src} alt={player.name} className="size-12 rounded-lg object-cover shadow-[0_0_20px_rgba(251,191,36,0.4)]" />
+      <div>
+        <div className="font-mono text-[9px] text-neon-gold uppercase tracking-widest">#{player.no} · {player.pos}{photo ? " · REAL" : ""}</div>
+        <div className="font-display tracking-wide text-white text-sm leading-tight">{player.name}</div>
+        <div className="font-mono text-[9px] text-white/50">{team.flag} {team.name}</div>
+      </div>
+    </div>
+  );
+}
+
