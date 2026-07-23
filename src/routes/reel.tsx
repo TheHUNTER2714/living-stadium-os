@@ -519,6 +519,15 @@ function Reel() {
                       </span>
                     </span>
                   </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={autoLoop} onChange={(e) => setAutoLoop(e.target.checked)} className="size-4 accent-neon-gold" />
+                    <span className="text-sm">
+                      Auto-loop playback
+                      <span className="block text-[10px] text-white/40 font-mono">Reel restarts automatically — perfect for kiosks & watch parties</span>
+                    </span>
+                  </label>
+
                 </div>
               </Section>
 
