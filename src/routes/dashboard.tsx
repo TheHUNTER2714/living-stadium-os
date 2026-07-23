@@ -249,8 +249,9 @@ function Dashboard() {
                     {langMeta.flag} {langMeta.label} · {aiSpeaking ? "speaking…" : listening ? "listening…" : aiThinking ? "thinking…" : "standby"}
                   </div>
                   <div className="text-[9px] font-mono text-white/30">
-                    voice {voiceOut ? "on" : "off"} · latency alerts silent · {voiceSupported ? "STT ready" : "STT off"}
+                    voice {voiceOut ? "on" : "off"} · occupancy/latency alerts silent · {voiceSupported ? "STT ready" : "STT off"}
                   </div>
+
                 </div>
               </div>
               <button onClick={() => setVoiceOut((v) => !v)}
