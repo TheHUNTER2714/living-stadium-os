@@ -145,18 +145,12 @@ function Passport() {
           </Field>
 
           {team && (
-            <Field label={`4 · Your hero from ${team.name}`}>
+            <Field label={`4 · Your hero from ${team.name}  ·  📷 attach real photos`}>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
                 {team.players.map((p) => (
-                  <button key={p.name} onClick={() => setFavoritePlayer(p.name)}
-                    className={`flex gap-2 p-2 rounded border transition text-left ${favoritePlayer === p.name ? "border-neon-gold bg-neon-gold/10" : "border-white/10 bg-black/30 hover:border-white/30"}`}>
-                    <img src={playerAvatar(p, team)} alt={p.name} className="size-14 rounded shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <div className="font-mono text-[9px] text-white/40">#{p.no} · {p.pos}</div>
-                      <div className="font-display tracking-wide text-sm truncate">{p.name}</div>
-                      {p.club && <div className="font-mono text-[9px] text-white/40 truncate">{p.club}</div>}
-                    </div>
-                  </button>
+                  <PlayerCard key={p.name} player={p} team={team}
+                    selected={favoritePlayer === p.name}
+                    onPick={() => setFavoritePlayer(p.name)} />
                 ))}
               </div>
             </Field>
