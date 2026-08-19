@@ -77,7 +77,7 @@ function Passport() {
                 <span className="font-mono text-[10px] uppercase tracking-widest opacity-80">FIFA WC 2026 · Fan Passport</span>
                 <span className="font-mono text-[10px]">#{Math.floor(100000 + Math.random() * 900000)}</span>
               </div>
-              <HeroPhotoPreview name={favoritePlayer} />
+              <HeroPhotoPreview name={favoritePlayer} fallback={team?.players.find((p) => p.name === favoritePlayer)?.photo} />
 
               <div className="mt-auto">
                 <div className="font-mono text-[10px] uppercase tracking-widest opacity-70">NAME</div>
@@ -135,13 +135,14 @@ function Passport() {
               {teams.map((t) => (
                 <button key={t.code} onClick={() => { setTeamCode(t.code); setFavoritePlayer(""); }}
                   className={`flex items-center gap-2 px-3 py-2 rounded border text-left transition ${teamCode === t.code ? "border-neon-cyan bg-neon-cyan/10" : "border-white/10 bg-black/30 hover:border-white/30"}`}>
-                  <span className="text-lg">{t.flag}</span>
+                  <img src={t.flagUrl} alt="" loading="lazy" className="w-7 h-5 object-cover rounded-sm shrink-0" />
                   <span className="flex-1 min-w-0">
                     <span className="block font-display tracking-wide text-sm truncate">{t.name}</span>
-                    <span className="block font-mono text-[9px] text-white/40">GRP {t.group} · {t.players.length} PL</span>
+                    <span className="block font-mono text-[9px] text-white/40">{t.confederation} · {t.players.length} PL{t.host ? " · HOST" : ""}</span>
                   </span>
                 </button>
               ))}
+
               {teams.length === 0 && <div className="col-span-full text-center text-xs text-white/40 py-6">No teams match.</div>}
             </div>
           </Field>
@@ -179,22 +180,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function HeroPhotoPreview({ name }: { name: string }) {
+function HeroPhotoPreview({ name, fallback }: { name: string; fallback?: string | null }) {
   const photo = usePlayerPhoto(name);
-  if (!name || !photo) return null;
+  const src = photo || fallback;
+  if (!name || !src) return null;
   return (
     <div className="mt-3 inline-flex items-center gap-2 self-start rounded-lg bg-black/30 border border-white/20 p-1.5">
-      <img src={photo} alt={name} className="size-12 rounded object-cover" />
-      <span className="font-mono text-[10px] uppercase tracking-widest opacity-80">Real photo · attached</span>
+      <img src={src} alt={name} className="size-12 rounded object-cover" />
+      <span className="font-mono text-[10px] uppercase tracking-widest opacity-80">{photo ? "Real photo · attached" : "Official FIFA portrait"}</span>
     </div>
   );
 }
+
 
 function PlayerCard({ player, team, selected, onPick }:
   { player: import("@/data/wc2026").Player; team: import("@/data/wc2026").Team; selected: boolean; onPick: () => void }) {
   const photo = usePlayerPhoto(player.name);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const src = photo || playerAvatar(player, team);
+  const src = photo || player.photo || playerAvatar(player, team);
 
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -209,15 +212,18 @@ function PlayerCard({ player, team, selected, onPick }:
     <div className={`relative flex gap-2 p-2 rounded border transition ${selected ? "border-neon-gold bg-neon-gold/10" : "border-white/10 bg-black/30 hover:border-white/30"}`}>
       <button onClick={onPick} className="flex gap-2 flex-1 min-w-0 text-left">
         <div className="relative shrink-0">
-          <img src={src} alt={player.name} className="size-14 rounded object-cover" />
-          {photo && <span className="absolute -bottom-1 -right-1 text-[9px] bg-neon-cyan text-black font-mono rounded px-1">PHOTO</span>}
+          <img src={src} alt={player.name} loading="lazy" className="size-14 rounded object-cover bg-black/40" />
+          {(photo || player.photo) && <span className="absolute -bottom-1 -right-1 text-[9px] bg-neon-cyan text-black font-mono rounded px-1">{photo ? "PHOTO" : "FIFA"}</span>}
         </div>
         <div className="min-w-0 flex-1">
           <div className="font-mono text-[9px] text-white/40">#{player.no} · {player.pos}</div>
           <div className="font-display tracking-wide text-sm truncate">{player.name}</div>
-          {player.club && <div className="font-mono text-[9px] text-white/40 truncate">{player.club}</div>}
+          <div className="font-mono text-[9px] text-white/40 truncate">
+            {player.height ? `${player.height}cm` : ""}{player.birth ? ` · ${player.birth.slice(0, 4)}` : ""}
+          </div>
         </div>
       </button>
+
       <div className="flex flex-col gap-1">
         <button onClick={() => fileRef.current?.click()} title="Attach a real photo"
           className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-white/15 text-white/70 hover:border-neon-cyan hover:text-neon-cyan">📷</button>
