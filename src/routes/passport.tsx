@@ -179,16 +179,18 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function HeroPhotoPreview({ name }: { name: string }) {
+function HeroPhotoPreview({ name, fallback }: { name: string; fallback?: string | null }) {
   const photo = usePlayerPhoto(name);
-  if (!name || !photo) return null;
+  const src = photo || fallback;
+  if (!name || !src) return null;
   return (
     <div className="mt-3 inline-flex items-center gap-2 self-start rounded-lg bg-black/30 border border-white/20 p-1.5">
-      <img src={photo} alt={name} className="size-12 rounded object-cover" />
-      <span className="font-mono text-[10px] uppercase tracking-widest opacity-80">Real photo · attached</span>
+      <img src={src} alt={name} className="size-12 rounded object-cover" />
+      <span className="font-mono text-[10px] uppercase tracking-widest opacity-80">{photo ? "Real photo · attached" : "Official FIFA portrait"}</span>
     </div>
   );
 }
+
 
 function PlayerCard({ player, team, selected, onPick }:
   { player: import("@/data/wc2026").Player; team: import("@/data/wc2026").Team; selected: boolean; onPick: () => void }) {
