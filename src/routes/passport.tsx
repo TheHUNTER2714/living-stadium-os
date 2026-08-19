@@ -135,13 +135,14 @@ function Passport() {
               {teams.map((t) => (
                 <button key={t.code} onClick={() => { setTeamCode(t.code); setFavoritePlayer(""); }}
                   className={`flex items-center gap-2 px-3 py-2 rounded border text-left transition ${teamCode === t.code ? "border-neon-cyan bg-neon-cyan/10" : "border-white/10 bg-black/30 hover:border-white/30"}`}>
-                  <span className="text-lg">{t.flag}</span>
+                  <img src={t.flagUrl} alt="" loading="lazy" className="w-7 h-5 object-cover rounded-sm shrink-0" />
                   <span className="flex-1 min-w-0">
                     <span className="block font-display tracking-wide text-sm truncate">{t.name}</span>
-                    <span className="block font-mono text-[9px] text-white/40">GRP {t.group} · {t.players.length} PL</span>
+                    <span className="block font-mono text-[9px] text-white/40">{t.confederation} · {t.players.length} PL{t.host ? " · HOST" : ""}</span>
                   </span>
                 </button>
               ))}
+
               {teams.length === 0 && <div className="col-span-full text-center text-xs text-white/40 py-6">No teams match.</div>}
             </div>
           </Field>
