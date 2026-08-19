@@ -77,7 +77,7 @@ function Passport() {
                 <span className="font-mono text-[10px] uppercase tracking-widest opacity-80">FIFA WC 2026 · Fan Passport</span>
                 <span className="font-mono text-[10px]">#{Math.floor(100000 + Math.random() * 900000)}</span>
               </div>
-              <HeroPhotoPreview name={favoritePlayer} />
+              <HeroPhotoPreview name={favoritePlayer} fallback={team?.players.find((p) => p.name === favoritePlayer)?.photo} />
 
               <div className="mt-auto">
                 <div className="font-mono text-[10px] uppercase tracking-widest opacity-70">NAME</div>
