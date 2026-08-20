@@ -20,6 +20,8 @@ function Passport() {
   const [favoritePlayer, setFavoritePlayer] = useState(existing?.favoritePlayer ?? "");
   const [lang, setLang] = useState(existing?.lang ?? "en");
   const [q, setQ] = useState("");
+  const [bg, setBg] = useState<"full" | "portrait" | "off">("full");
+
 
   const team = getTeam(teamCode);
   const teams = useMemo(
