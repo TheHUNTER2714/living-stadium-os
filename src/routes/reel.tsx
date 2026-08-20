@@ -615,7 +615,22 @@ function Reel() {
             </div>
           ))}
 
+          {/* Hero player full-bleed backdrop */}
+          {(() => {
+            const hp = team?.players.find((p) => p.name === player);
+            if (!hp || heroBg === "off") return null;
+            return <HeroBackdrop key={`${scene}-${heroBg}`} player={hp} team={team!} mode={heroBg} />;
+          })()}
+
+          {/* Backdrop mode switch */}
+          <button onClick={() => setHeroBg(heroBg === "full" ? "side" : heroBg === "side" ? "off" : "full")}
+            title="Hero backdrop mode"
+            className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/60 backdrop-blur border border-white/20 font-mono text-[10px] tracking-widest text-white/70 hover:text-neon-cyan hover:border-neon-cyan transition">
+            HERO BG · {heroBg.toUpperCase()}
+          </button>
+
           {/* VHS scanlines */}
+
           {styleFX.scanline && (
             <div className="absolute inset-0 pointer-events-none opacity-30" style={{
               backgroundImage: "repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 1px, transparent 2px, transparent 3px)"
