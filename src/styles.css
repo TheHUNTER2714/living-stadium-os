@@ -105,3 +105,8 @@
     font-family: var(--font-sans);
   }
 }
+
+@keyframes hero-kenburns {
+  from { transform: scale(1.18) translate3d(2%, 1%, 0); }
+  to   { transform: scale(1.02) translate3d(-1%, -1%, 0); }
+}

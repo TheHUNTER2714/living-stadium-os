@@ -49,6 +49,8 @@ function Reel() {
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const [autoLoop, setAutoLoop] = useState(false);
+  const [heroBg, setHeroBg] = useState<"full" | "side" | "off">("full");
+
 
   const rafRef = useRef<number | null>(null);
   const startedAt = useRef<number>(0);
@@ -613,7 +615,22 @@ function Reel() {
             </div>
           ))}
 
+          {/* Hero player full-bleed backdrop */}
+          {(() => {
+            const hp = team?.players.find((p) => p.name === player);
+            if (!hp || heroBg === "off") return null;
+            return <HeroBackdrop key={`${scene}-${heroBg}`} player={hp} team={team!} mode={heroBg} />;
+          })()}
+
+          {/* Backdrop mode switch */}
+          <button onClick={() => setHeroBg(heroBg === "full" ? "side" : heroBg === "side" ? "off" : "full")}
+            title="Hero backdrop mode"
+            className="absolute top-4 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/60 backdrop-blur border border-white/20 font-mono text-[10px] tracking-widest text-white/70 hover:text-neon-cyan hover:border-neon-cyan transition">
+            HERO BG · {heroBg.toUpperCase()}
+          </button>
+
           {/* VHS scanlines */}
+
           {styleFX.scanline && (
             <div className="absolute inset-0 pointer-events-none opacity-30" style={{
               backgroundImage: "repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 1px, transparent 2px, transparent 3px)"
@@ -866,3 +883,28 @@ function HeroChip({ player, team, sceneKey }:
   );
 }
 
+
+function HeroBackdrop({ player, team, mode }:
+  { player: import("@/data/wc2026").Player; team: import("@/data/wc2026").Team; mode: "full" | "side" }) {
+  const photo = usePlayerPhoto(player.name);
+  const src = photo || player.photo || playerAvatar(player, team);
+  if (mode === "full") {
+    return (
+      <div className="absolute inset-0 z-[4] pointer-events-none overflow-hidden">
+        <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40"
+          style={{ animation: "hero-kenburns 9s ease-out both", filter: "saturate(1.15) contrast(1.05)" }} />
+        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${team.color}22 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.9) 100%)` }} />
+        <div className="absolute inset-0 mix-blend-overlay opacity-40"
+          style={{ background: `radial-gradient(circle at 70% 30%, ${team.accent}66, transparent 60%)` }} />
+      </div>
+    );
+  }
+  return (
+    <div className="absolute inset-y-0 right-0 w-1/2 z-[4] pointer-events-none overflow-hidden">
+      <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover object-top opacity-70"
+        style={{ animation: "hero-kenburns 9s ease-out both", maskImage: "linear-gradient(90deg, transparent, #000 45%)", WebkitMaskImage: "linear-gradient(90deg, transparent, #000 45%)" }} />
+      <div className="absolute inset-0 mix-blend-overlay opacity-50"
+        style={{ background: `linear-gradient(200deg, ${team.accent}55, transparent 60%)` }} />
+    </div>
+  );
+}
