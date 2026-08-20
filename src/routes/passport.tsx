@@ -58,7 +58,13 @@ function Passport() {
       <main className="relative z-10 max-w-6xl mx-auto p-6 grid grid-cols-12 gap-6">
         {/* LEFT: Identity card preview */}
         <section className="col-span-12 md:col-span-5">
-          <div className="text-[10px] font-mono text-neon-cyan uppercase tracking-widest mb-2">Preview</div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[10px] font-mono text-neon-cyan uppercase tracking-widest">Preview</div>
+            <button onClick={() => setBg(bg === "full" ? "portrait" : bg === "portrait" ? "off" : "full")}
+              className="text-[9px] font-mono px-2 py-1 rounded-full border border-white/15 text-white/60 hover:border-neon-cyan hover:text-neon-cyan transition">
+              HERO BG · {bg.toUpperCase()}
+            </button>
+          </div>
           <div
             className="rounded-2xl p-6 border shadow-[0_20px_60px_-20px_rgba(0,0,0,0.9)] relative overflow-hidden aspect-[3/4]"
             style={{
@@ -68,10 +74,12 @@ function Passport() {
               borderColor: team?.accent ?? "rgba(255,255,255,0.1)",
             }}
           >
+            <HeroBackdrop name={favoritePlayer} fallback={team?.players.find((p) => p.name === favoritePlayer)?.photo} mode={bg} />
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
             <div className="absolute top-0 right-0 text-[240px] leading-none opacity-20 select-none pointer-events-none">
               {team?.flag ?? "⚽"}
             </div>
+
             <div className="relative z-10 flex flex-col h-full text-black mix-blend-normal" style={{ color: team?.color === "#FFFFFF" || team?.color === "#FCD116" || team?.color === "#FFDF00" ? "#000" : "#fff" }}>
               <div className="flex justify-between items-start">
                 <span className="font-mono text-[10px] uppercase tracking-widest opacity-80">FIFA WC 2026 · Fan Passport</span>
