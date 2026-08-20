@@ -247,3 +247,25 @@ function PlayerCard({ player, team, selected, onPick }:
   );
 }
 
+
+function HeroBackdrop({ name, fallback, mode }: { name: string; fallback?: string | null; mode: "full" | "portrait" | "off" }) {
+  const photo = usePlayerPhoto(name);
+  const src = photo || fallback;
+  if (!name || !src || mode === "off") return null;
+  if (mode === "full") {
+    return (
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover opacity-55"
+          style={{ animation: "hero-kenburns 14s ease-out both" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.82) 100%)" }} />
+      </div>
+    );
+  }
+  return (
+    <div className="absolute inset-y-0 right-0 w-3/4 pointer-events-none overflow-hidden">
+      <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover object-top opacity-75"
+        style={{ maskImage: "linear-gradient(200deg, transparent 8%, #000 55%)", WebkitMaskImage: "linear-gradient(200deg, transparent 8%, #000 55%)" }} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.8) 100%)" }} />
+    </div>
+  );
+}
