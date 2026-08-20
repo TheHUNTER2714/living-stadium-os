@@ -4,6 +4,7 @@ import stadiumTwin from "@/assets/stadium-twin.jpg";
 import sustainabilityRing from "@/assets/sustainability-ring.png";
 import { loadPassport, savePassport } from "@/lib/passport";
 import { getTeam } from "@/data/wc2026";
+import { answerFromData } from "@/lib/wc-knowledge";
 import { COPILOT, LANGUAGES, classifyIntent, type LangCode } from "@/data/i18n";
 import { createPTT, speak, cancelSpeech } from "@/lib/voice";
 import { RobotMascot, type RobotEmotion } from "@/components/RobotMascot";
