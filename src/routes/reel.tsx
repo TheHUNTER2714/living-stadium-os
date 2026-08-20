@@ -883,3 +883,28 @@ function HeroChip({ player, team, sceneKey }:
   );
 }
 
+
+function HeroBackdrop({ player, team, mode }:
+  { player: import("@/data/wc2026").Player; team: import("@/data/wc2026").Team; mode: "full" | "side" }) {
+  const photo = usePlayerPhoto(player.name);
+  const src = photo || player.photo || playerAvatar(player, team);
+  if (mode === "full") {
+    return (
+      <div className="absolute inset-0 z-[4] pointer-events-none overflow-hidden">
+        <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40"
+          style={{ animation: "hero-kenburns 9s ease-out both", filter: "saturate(1.15) contrast(1.05)" }} />
+        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${team.color}22 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.9) 100%)` }} />
+        <div className="absolute inset-0 mix-blend-overlay opacity-40"
+          style={{ background: `radial-gradient(circle at 70% 30%, ${team.accent}66, transparent 60%)` }} />
+      </div>
+    );
+  }
+  return (
+    <div className="absolute inset-y-0 right-0 w-1/2 z-[4] pointer-events-none overflow-hidden">
+      <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover object-top opacity-70"
+        style={{ animation: "hero-kenburns 9s ease-out both", maskImage: "linear-gradient(90deg, transparent, #000 45%)", WebkitMaskImage: "linear-gradient(90deg, transparent, #000 45%)" }} />
+      <div className="absolute inset-0 mix-blend-overlay opacity-50"
+        style={{ background: `linear-gradient(200deg, ${team.accent}55, transparent 60%)` }} />
+    </div>
+  );
+}
