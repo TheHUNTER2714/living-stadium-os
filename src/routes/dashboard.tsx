@@ -135,8 +135,9 @@ function Dashboard() {
     setAiThinking(true);
     setTimeout(() => {
       const intent = classifyIntent(q);
-      const reply = COPILOT[lang][intent];
+      const reply = answerFromData(q) ?? COPILOT[lang][intent];
       setChat((c) => [...c, { role: "ai", text: reply, ts }]);
+
       setAiThinking(false);
       // Speak every reply (voice, text — anything) — not just voice-triggered ones
       if (voiceOut) speak(reply, langMeta.voice);
