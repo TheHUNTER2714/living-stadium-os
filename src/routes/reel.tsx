@@ -49,6 +49,8 @@ function Reel() {
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const [autoLoop, setAutoLoop] = useState(false);
+  const [heroBg, setHeroBg] = useState<"full" | "side" | "off">("full");
+
 
   const rafRef = useRef<number | null>(null);
   const startedAt = useRef<number>(0);
