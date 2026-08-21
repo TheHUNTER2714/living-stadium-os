@@ -2,6 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import landingHero from "@/assets/landing-hero.jpg";
 import { loadPassport } from "@/lib/passport";
+import { BootSequence } from "@/components/BootSequence";
+import { CursorSpotlight, ParticleField, AnimatedGrid, Magnetic, CountUp, HoloPanel } from "@/components/fx";
+import { STADIUMS } from "@/data/stadiums";
+import { ALL_TEAMS, allPlayers } from "@/data/wc2026";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,26 +20,34 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const navigate = useNavigate();
   const [stage, setStage] = useState(0);
+  const [booted, setBooted] = useState(false);
   const [hasPassport, setHasPassport] = useState(false);
 
   useEffect(() => {
     setHasPassport(!!loadPassport());
+  }, []);
+
+  useEffect(() => {
+    if (!booted) return;
     const timers = [
-      setTimeout(() => setStage(1), 400),
-      setTimeout(() => setStage(2), 1600),
-      setTimeout(() => setStage(3), 3000),
-      setTimeout(() => setStage(4), 4200),
+      setTimeout(() => setStage(1), 200),
+      setTimeout(() => setStage(2), 1100),
+      setTimeout(() => setStage(3), 2200),
+      setTimeout(() => setStage(4), 3200),
     ];
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [booted]);
 
   const enter = () => navigate({ to: hasPassport ? "/dashboard" : "/passport" });
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white relative overflow-x-hidden">
+      <BootSequence onDone={() => setBooted(true)} />
+      <CursorSpotlight />
+      <div className="relative min-h-screen overflow-hidden">
       <img
         src={landingHero}
-        alt=""
+        alt="Floodlit World Cup 2026 stadium at night"
         className="absolute inset-0 w-full h-full object-cover transition-all duration-[1500ms]"
         style={{
           opacity: stage >= 1 ? 0.7 : 0,
@@ -44,6 +56,9 @@ function Landing() {
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/40" />
+      <AnimatedGrid opacity={stage >= 2 ? 0.5 : 0} className="transition-opacity duration-1000" />
+      <ParticleField count={80} />
+
 
       {stage >= 1 && (
         <div className="absolute inset-0 pointer-events-none">
