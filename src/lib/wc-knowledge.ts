@@ -2,6 +2,8 @@
 // Answers squad / player / team questions straight from FIFA.com data.
 
 import { ALL_TEAMS, allPlayers, type Player, type Team } from "@/data/wc2026";
+import { stadiumAnswer } from "@/data/stadiums";
+
 
 const norm = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
