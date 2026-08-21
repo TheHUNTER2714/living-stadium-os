@@ -278,16 +278,49 @@ function AR() {
         )}
 
         <div className="glass-panel p-4 max-w-3xl mx-auto">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="text-[10px] font-mono text-white/40 uppercase">Venue</span>
+            <select value={venueId} onChange={(e) => setVenueId(e.target.value)}
+              className="bg-black/60 border border-white/15 rounded px-2 py-1 text-xs text-white focus:border-neon-cyan outline-none">
+              {STADIUMS.map((s) => (
+                <option key={s.id} value={s.id}>{s.name} · {s.city}</option>
+              ))}
+            </select>
+            <button onClick={() => setIntelOpen((v) => !v)}
+              className="ml-auto px-3 py-1 rounded border border-neon-cyan/40 text-neon-cyan font-mono text-[10px] tracking-widest hover:bg-neon-cyan/10">
+              {intelOpen ? "HIDE" : "STADIUM"} INTEL
+            </button>
+          </div>
+
+          {intelOpen && (
+            <div className="mb-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+              {[
+                { k: "Capacity", v: <CountUp to={venue.capacity} /> },
+                { k: "Roof", v: venue.roof },
+                { k: "Opened", v: venue.opened },
+                { k: "Waypoints", v: venue.zones.length },
+              ].map((c) => (
+                <div key={c.k} className="rounded-lg bg-white/5 border border-white/10 p-2">
+                  <div className="font-mono text-[9px] uppercase text-white/40">{c.k}</div>
+                  <div className="font-display text-lg text-neon-cyan">{c.v}</div>
+                </div>
+              ))}
+              <div className="col-span-2 md:col-span-4 text-[11px] text-white/55">
+                {venue.surface} · Hosting {venue.matches} · {venue.tz}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-[10px] font-mono text-white/40 uppercase">Navigating to</div>
               <div className="font-display text-xl tracking-wide text-neon-cyan">{dest.icon} {dest.label}</div>
-              <div className="text-xs text-white/60">{dest.detail}</div>
+              <div className="text-xs text-white/60">{dest.detail}{dest.level ? ` · Level ${dest.level}` : ""}</div>
             </div>
             <div className="text-right">
               <div className="text-[10px] font-mono text-white/40 uppercase">Distance · ETA</div>
               <div className="font-display text-2xl text-neon-gold tabular-nums">{distance}m</div>
-              <div className="text-[10px] font-mono text-neon-green">{eta} min · voice {voiceOn ? "on" : "off"}</div>
+              <div className="text-[10px] font-mono text-neon-green">{eta} min · voice {voiceOn ? "on" : "off"}{stepFreeOnly ? " · step-free" : ""}</div>
             </div>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -303,9 +336,12 @@ function AR() {
         </div>
       </div>
 
+      {status !== "on" && <ParticleField count={60} className="z-0" />}
+
       <style>{`
         @keyframes radar-sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
+
 }
