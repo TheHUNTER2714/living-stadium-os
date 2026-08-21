@@ -1,41 +1,58 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { speak, cancelSpeech } from "@/lib/voice";
 import { loadPassport } from "@/lib/passport";
 import { LANGUAGES } from "@/data/i18n";
+import { STADIUMS, getStadium } from "@/data/stadiums";
+import { ParticleField, CountUp } from "@/components/fx";
 
 export const Route = createFileRoute("/ar")({
-  head: () => ({ meta: [{ title: "AR Wayfinding · StadiumOS AI" }] }),
+  head: () => ({
+    meta: [
+      { title: "AR Wayfinding · StadiumOS AI" },
+      { name: "description", content: "Holographic AR wayfinding across all 16 FIFA World Cup 2026 venues — seats, step-free routes, medical posts, transit hubs and voice guidance." },
+      { property: "og:title", content: "AR Wayfinding · StadiumOS AI" },
+      { property: "og:description", content: "Camera AR arrows, live compass, radar and venue knowledge for all 16 World Cup 2026 stadiums." },
+    ],
+  }),
   component: AR,
 });
 
-type Waypoint = { id: string; label: string; detail: string; dir: number; distance: number; icon: string; custom?: boolean };
-
-const DEFAULT_WAYPOINTS: Waypoint[] = [
-  { id: "seat", label: "My Seat", detail: "Row 22 · Seat 14", dir: 12, distance: 90, icon: "🎟" },
-  { id: "food", label: "Food Court", detail: "Level 2", dir: -35, distance: 60, icon: "🍔" },
-  { id: "washroom", label: "Accessible WC", detail: "Sector B", dir: 45, distance: 40, icon: "♿" },
-  { id: "exit", label: "Nearest Exit", detail: "North Gate", dir: 180, distance: 110, icon: "🚪" },
-  { id: "medical", label: "Medical Post", detail: "Level 1", dir: -80, distance: 70, icon: "⛑" },
-];
+type Waypoint = { id: string; label: string; detail: string; dir: number; distance: number; icon: string; level?: number; accessible?: boolean; custom?: boolean };
 
 function AR() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [waypoints, setWaypoints] = useState<Waypoint[]>(DEFAULT_WAYPOINTS);
-  const [destId, setDestId] = useState<string>(DEFAULT_WAYPOINTS[0].id);
+  const [venueId, setVenueId] = useState<string>(STADIUMS[0].id);
+  const venue = getStadium(venueId) ?? STADIUMS[0];
+  const [customPins, setCustomPins] = useState<Waypoint[]>([]);
+  const [stepFreeOnly, setStepFreeOnly] = useState(false);
+  const [destId, setDestId] = useState<string>(venue.zones[0].id);
   const [status, setStatus] = useState<"idle" | "loading" | "on" | "denied">("idle");
   const [distance, setDistance] = useState(90);
   const [heading, setHeading] = useState(12);
   const [torchOn, setTorchOn] = useState(false);
   const [torchAvail, setTorchAvail] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
+  const [intelOpen, setIntelOpen] = useState(false);
   const lastAnnouncedRef = useRef<number>(1e9);
 
   const passport = typeof window !== "undefined" ? loadPassport() : null;
   const lang = LANGUAGES.find((l) => l.code === (passport?.lang ?? "en")) ?? LANGUAGES[0];
 
+  const waypoints = useMemo<Waypoint[]>(() => {
+    const base = venue.zones.map((z) => ({ ...z }));
+    const all = [...base, ...customPins];
+    return stepFreeOnly ? all.filter((w) => w.accessible !== false) : all;
+  }, [venue, customPins, stepFreeOnly]);
+
   const dest = waypoints.find((w) => w.id === destId) ?? waypoints[0];
+
+  // Keep destination valid when the venue or filter changes
+  useEffect(() => {
+    if (!waypoints.some((w) => w.id === destId)) setDestId(waypoints[0].id);
+  }, [waypoints, destId]);
+
 
   const start = async () => {
     setStatus("loading");
@@ -118,19 +135,27 @@ function AR() {
   const dropPin = () => {
     const id = `pin-${Date.now()}`;
     const dir = Math.round((Math.random() - 0.5) * 300);
-    const distance = 30 + Math.round(Math.random() * 80);
-    const label = `Waypoint ${waypoints.filter((w) => w.custom).length + 1}`;
-    const pin: Waypoint = { id, label, detail: `Dropped pin · ${distance}m`, dir, distance, icon: "📍", custom: true };
-    setWaypoints((w) => [...w, pin]);
+    const dist = 30 + Math.round(Math.random() * 80);
+    const label = `Waypoint ${customPins.length + 1}`;
+    const pin: Waypoint = { id, label, detail: `Dropped pin · ${dist}m`, dir, distance: dist, icon: "📍", accessible: true, custom: true };
+    setCustomPins((w) => [...w, pin]);
     setDestId(id);
     if (voiceOn) speak(`New waypoint dropped. Navigating.`, lang.voice);
   };
 
   const removePin = () => {
     if (!dest.custom) return;
-    setWaypoints((w) => w.filter((x) => x.id !== dest.id));
-    setDestId(DEFAULT_WAYPOINTS[0].id);
+    setCustomPins((w) => w.filter((x) => x.id !== dest.id));
+    setDestId(venue.zones[0].id);
   };
+
+  // Emergency: fastest exit + medical
+  const panic = () => {
+    const exit = waypoints.find((w) => w.id === "exit") ?? waypoints[0];
+    setDestId(exit.id);
+    speak(`Emergency mode. Guiding you to ${exit.label}. Stay calm and follow the arrow.`, lang.voice);
+  };
+
 
   // Arrow rotates by dir minus heading offset (0° = north)
   const arrowRotation = dest.dir - (heading - 12);
@@ -220,12 +245,19 @@ function AR() {
             <button onClick={dropPin}
               className="size-11 rounded-full bg-black/60 backdrop-blur border border-white/20 text-white/70 font-mono text-lg hover:border-neon-cyan"
               title="Drop waypoint">📍</button>
+            <button onClick={() => setStepFreeOnly((v) => !v)}
+              className={`size-11 rounded-full backdrop-blur border font-mono text-lg ${stepFreeOnly ? "bg-neon-green/20 border-neon-green text-neon-green" : "bg-black/60 border-white/20 text-white/60"}`}
+              title="Step-free routes only">♿</button>
+            <button onClick={panic}
+              className="size-11 rounded-full bg-neon-alert/20 backdrop-blur border border-neon-alert text-neon-alert font-mono text-sm animate-pulse"
+              title="Emergency exit routing">SOS</button>
             {dest.custom && (
               <button onClick={removePin}
                 className="size-11 rounded-full bg-neon-alert/20 backdrop-blur border border-neon-alert text-neon-alert font-mono text-lg"
                 title="Remove pin">✕</button>
             )}
           </div>
+
         </div>
       )}
 
@@ -246,16 +278,49 @@ function AR() {
         )}
 
         <div className="glass-panel p-4 max-w-3xl mx-auto">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="text-[10px] font-mono text-white/40 uppercase">Venue</span>
+            <select value={venueId} onChange={(e) => setVenueId(e.target.value)}
+              className="bg-black/60 border border-white/15 rounded px-2 py-1 text-xs text-white focus:border-neon-cyan outline-none">
+              {STADIUMS.map((s) => (
+                <option key={s.id} value={s.id}>{s.name} · {s.city}</option>
+              ))}
+            </select>
+            <button onClick={() => setIntelOpen((v) => !v)}
+              className="ml-auto px-3 py-1 rounded border border-neon-cyan/40 text-neon-cyan font-mono text-[10px] tracking-widest hover:bg-neon-cyan/10">
+              {intelOpen ? "HIDE" : "STADIUM"} INTEL
+            </button>
+          </div>
+
+          {intelOpen && (
+            <div className="mb-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+              {[
+                { k: "Capacity", v: <CountUp to={venue.capacity} /> },
+                { k: "Roof", v: venue.roof },
+                { k: "Opened", v: venue.opened },
+                { k: "Waypoints", v: venue.zones.length },
+              ].map((c) => (
+                <div key={c.k} className="rounded-lg bg-white/5 border border-white/10 p-2">
+                  <div className="font-mono text-[9px] uppercase text-white/40">{c.k}</div>
+                  <div className="font-display text-lg text-neon-cyan">{c.v}</div>
+                </div>
+              ))}
+              <div className="col-span-2 md:col-span-4 text-[11px] text-white/55">
+                {venue.surface} · Hosting {venue.matches} · {venue.tz}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-[10px] font-mono text-white/40 uppercase">Navigating to</div>
               <div className="font-display text-xl tracking-wide text-neon-cyan">{dest.icon} {dest.label}</div>
-              <div className="text-xs text-white/60">{dest.detail}</div>
+              <div className="text-xs text-white/60">{dest.detail}{dest.level ? ` · Level ${dest.level}` : ""}</div>
             </div>
             <div className="text-right">
               <div className="text-[10px] font-mono text-white/40 uppercase">Distance · ETA</div>
               <div className="font-display text-2xl text-neon-gold tabular-nums">{distance}m</div>
-              <div className="text-[10px] font-mono text-neon-green">{eta} min · voice {voiceOn ? "on" : "off"}</div>
+              <div className="text-[10px] font-mono text-neon-green">{eta} min · voice {voiceOn ? "on" : "off"}{stepFreeOnly ? " · step-free" : ""}</div>
             </div>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -271,9 +336,12 @@ function AR() {
         </div>
       </div>
 
+      {status !== "on" && <ParticleField count={60} className="z-0" />}
+
       <style>{`
         @keyframes radar-sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
+
 }

@@ -2,6 +2,8 @@
 // Answers squad / player / team questions straight from FIFA.com data.
 
 import { ALL_TEAMS, allPlayers, type Player, type Team } from "@/data/wc2026";
+import { stadiumAnswer } from "@/data/stadiums";
+
 
 const norm = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
@@ -45,8 +47,11 @@ FW: ${by("FW")}`;
 /** Returns a data-grounded answer, or null when the question isn't about WC26 squads. */
 export function answerFromData(q: string): string | null {
   const n = norm(q);
+  const venue = stadiumAnswer(q);
+  if (venue) return venue;
   const player = findPlayer(q);
   const team = findTeam(q);
+
 
   if (player && !/squad|roster|lineup|team list|players of/.test(n)) {
     const age = player.birth ? Math.floor((Date.now() - new Date(player.birth).getTime()) / 3.15576e10) : null;

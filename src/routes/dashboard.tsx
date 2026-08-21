@@ -186,7 +186,10 @@ function Dashboard() {
   const occPct = (occupancy / CAPACITY) * 100;
 
   return (
-    <div className="min-h-screen bg-stadium-bg text-white font-sans selection:bg-neon-cyan/30 flex flex-col">
+    <div className="min-h-screen bg-stadium-bg text-white font-sans selection:bg-neon-cyan/30 flex flex-col relative">
+      <CursorSpotlight />
+      <div className="fixed inset-0 pointer-events-none"><AnimatedGrid opacity={0.18} /><ParticleField count={50} link={false} /></div>
+
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-neon-cyan/10 blur-[140px] rounded-full" />
         <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-neon-gold/10 blur-[140px] rounded-full" />
