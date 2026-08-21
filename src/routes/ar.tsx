@@ -1,41 +1,58 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { speak, cancelSpeech } from "@/lib/voice";
 import { loadPassport } from "@/lib/passport";
 import { LANGUAGES } from "@/data/i18n";
+import { STADIUMS, getStadium } from "@/data/stadiums";
+import { ParticleField, CountUp } from "@/components/fx";
 
 export const Route = createFileRoute("/ar")({
-  head: () => ({ meta: [{ title: "AR Wayfinding · StadiumOS AI" }] }),
+  head: () => ({
+    meta: [
+      { title: "AR Wayfinding · StadiumOS AI" },
+      { name: "description", content: "Holographic AR wayfinding across all 16 FIFA World Cup 2026 venues — seats, step-free routes, medical posts, transit hubs and voice guidance." },
+      { property: "og:title", content: "AR Wayfinding · StadiumOS AI" },
+      { property: "og:description", content: "Camera AR arrows, live compass, radar and venue knowledge for all 16 World Cup 2026 stadiums." },
+    ],
+  }),
   component: AR,
 });
 
-type Waypoint = { id: string; label: string; detail: string; dir: number; distance: number; icon: string; custom?: boolean };
-
-const DEFAULT_WAYPOINTS: Waypoint[] = [
-  { id: "seat", label: "My Seat", detail: "Row 22 · Seat 14", dir: 12, distance: 90, icon: "🎟" },
-  { id: "food", label: "Food Court", detail: "Level 2", dir: -35, distance: 60, icon: "🍔" },
-  { id: "washroom", label: "Accessible WC", detail: "Sector B", dir: 45, distance: 40, icon: "♿" },
-  { id: "exit", label: "Nearest Exit", detail: "North Gate", dir: 180, distance: 110, icon: "🚪" },
-  { id: "medical", label: "Medical Post", detail: "Level 1", dir: -80, distance: 70, icon: "⛑" },
-];
+type Waypoint = { id: string; label: string; detail: string; dir: number; distance: number; icon: string; level?: number; accessible?: boolean; custom?: boolean };
 
 function AR() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [waypoints, setWaypoints] = useState<Waypoint[]>(DEFAULT_WAYPOINTS);
-  const [destId, setDestId] = useState<string>(DEFAULT_WAYPOINTS[0].id);
+  const [venueId, setVenueId] = useState<string>(STADIUMS[0].id);
+  const venue = getStadium(venueId) ?? STADIUMS[0];
+  const [customPins, setCustomPins] = useState<Waypoint[]>([]);
+  const [stepFreeOnly, setStepFreeOnly] = useState(false);
+  const [destId, setDestId] = useState<string>(venue.zones[0].id);
   const [status, setStatus] = useState<"idle" | "loading" | "on" | "denied">("idle");
   const [distance, setDistance] = useState(90);
   const [heading, setHeading] = useState(12);
   const [torchOn, setTorchOn] = useState(false);
   const [torchAvail, setTorchAvail] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
+  const [intelOpen, setIntelOpen] = useState(false);
   const lastAnnouncedRef = useRef<number>(1e9);
 
   const passport = typeof window !== "undefined" ? loadPassport() : null;
   const lang = LANGUAGES.find((l) => l.code === (passport?.lang ?? "en")) ?? LANGUAGES[0];
 
+  const waypoints = useMemo<Waypoint[]>(() => {
+    const base = venue.zones.map((z) => ({ ...z }));
+    const all = [...base, ...customPins];
+    return stepFreeOnly ? all.filter((w) => w.accessible !== false) : all;
+  }, [venue, customPins, stepFreeOnly]);
+
   const dest = waypoints.find((w) => w.id === destId) ?? waypoints[0];
+
+  // Keep destination valid when the venue or filter changes
+  useEffect(() => {
+    if (!waypoints.some((w) => w.id === destId)) setDestId(waypoints[0].id);
+  }, [waypoints, destId]);
+
 
   const start = async () => {
     setStatus("loading");
