@@ -18,7 +18,7 @@ export type Stadium = {
   city: string;
   country: "USA" | "Canada" | "Mexico";
   capacity: number;
-  roof: "Open" | "Retractable" | "Fixed";
+  roof: string;
   surface: string;
   opened: number;
   matches: string;
@@ -27,19 +27,19 @@ export type Stadium = {
 };
 
 const baseZones = (seed: number, levels = 4): Zone[] => {
-  const spec: Array<[string, string, string, string, boolean]> = [
-    ["seat", "My Seat", "Row 22 · Seat 14", "🎟", "", true],
-    ["gate", "Entry Gate", "Ticket scan lanes", "🚩", "", true],
-    ["food", "Food Court", "Local street-food hall", "🍔", "", true],
-    ["washroom", "Accessible WC", "Step-free cubicles", "♿", "", true],
-    ["water", "Water Refill", "Free chilled taps", "💧", "", true],
-    ["merch", "Team Store", "Kits & scarves", "🛍", "", true],
-    ["medical", "Medical Post", "Paramedic station", "⛑", "", true],
-    ["lift", "Elevator Bank", "Step-free to all levels", "🛗", "", true],
-    ["family", "Family Lounge", "Baby-change & quiet room", "🧸", "", true],
-    ["fanzone", "Fan Zone", "Live DJ & big screen", "🎪", "", true],
-    ["exit", "Nearest Exit", "Crowd-managed egress", "🚪", "", true],
-    ["transit", "Transit Hub", "Metro / shuttle bays", "🚇", "", true],
+  const spec: Array<[string, string, string, string]> = [
+    ["seat", "My Seat", "Row 22 · Seat 14", "🎟"],
+    ["gate", "Entry Gate", "Ticket scan lanes", "🚩"],
+    ["food", "Food Court", "Local street-food hall", "🍔"],
+    ["washroom", "Accessible WC", "Step-free cubicles", "♿"],
+    ["water", "Water Refill", "Free chilled taps", "💧"],
+    ["merch", "Team Store", "Kits & scarves", "🛍"],
+    ["medical", "Medical Post", "Paramedic station", "⛑"],
+    ["lift", "Elevator Bank", "Step-free to all levels", "🛗"],
+    ["family", "Family Lounge", "Baby-change & quiet room", "🧸"],
+    ["fanzone", "Fan Zone", "Live DJ & big screen", "🎪"],
+    ["exit", "Nearest Exit", "Crowd-managed egress", "🚪"],
+    ["transit", "Transit Hub", "Metro / shuttle bays", "🚇"],
   ];
   return spec.map(([id, label, detail, icon], i) => {
     const r = (seed * (i + 3) * 37) % 360;
@@ -67,8 +67,8 @@ export const STADIUMS: Stadium[] = [
   { id: "levis", name: "Levi's Stadium", city: "San Francisco Bay Area", country: "USA", capacity: 68500, roof: "Open", surface: "Natural grass", opened: 2014, matches: "Round of 32 + 5", tz: "PDT", zones: baseZones(9) },
   { id: "lincoln", name: "Lincoln Financial Field", city: "Philadelphia", country: "USA", capacity: 69796, roof: "Open", surface: "Natural grass", opened: 2003, matches: "Round of 16 + 5", tz: "EDT", zones: baseZones(10) },
   { id: "gillette", name: "Gillette Stadium", city: "Boston", country: "USA", capacity: 65878, roof: "Open", surface: "Natural grass overlay", opened: 2002, matches: "Quarter-final + 6", tz: "EDT", zones: baseZones(11) },
-  { id: "hardrock", name: "Hard Rock Stadium", city: "Miami", country: "USA", capacity: 65326, roof: "Canopy", surface: "Natural grass", opened: 1987, matches: "Third-place + 6", tz: "EDT", zones: baseZones(12) } as Stadium,
-  { id: "lumen", name: "Lumen Field", city: "Seattle", country: "USA", capacity: 69000, roof: "Partial canopy", surface: "Natural grass overlay", opened: 2002, matches: "Round of 32 + 5", tz: "PDT", zones: baseZones(13) } as Stadium,
+  { id: "hardrock", name: "Hard Rock Stadium", city: "Miami", country: "USA", capacity: 65326, roof: "Canopy", surface: "Natural grass", opened: 1987, matches: "Third-place + 6", tz: "EDT", zones: baseZones(12) },
+  { id: "lumen", name: "Lumen Field", city: "Seattle", country: "USA", capacity: 69000, roof: "Partial canopy", surface: "Natural grass overlay", opened: 2002, matches: "Round of 32 + 5", tz: "PDT", zones: baseZones(13) },
   { id: "bmo", name: "BMO Field", city: "Toronto", country: "Canada", capacity: 45736, roof: "Open", surface: "Natural grass", opened: 2007, matches: "Group stage + Round of 32", tz: "EDT", zones: baseZones(14) },
   { id: "bcplace", name: "BC Place", city: "Vancouver", country: "Canada", capacity: 54500, roof: "Retractable", surface: "Natural grass overlay", opened: 1983, matches: "Round of 16 + 6", tz: "PDT", zones: baseZones(15) },
   { id: "akron", name: "Estadio Akron", city: "Guadalajara", country: "Mexico", capacity: 48071, roof: "Open", surface: "Natural grass", opened: 2010, matches: "Group stage x4", tz: "CST", zones: baseZones(16) },
