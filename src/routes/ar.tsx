@@ -135,19 +135,27 @@ function AR() {
   const dropPin = () => {
     const id = `pin-${Date.now()}`;
     const dir = Math.round((Math.random() - 0.5) * 300);
-    const distance = 30 + Math.round(Math.random() * 80);
-    const label = `Waypoint ${waypoints.filter((w) => w.custom).length + 1}`;
-    const pin: Waypoint = { id, label, detail: `Dropped pin · ${distance}m`, dir, distance, icon: "📍", custom: true };
-    setWaypoints((w) => [...w, pin]);
+    const dist = 30 + Math.round(Math.random() * 80);
+    const label = `Waypoint ${customPins.length + 1}`;
+    const pin: Waypoint = { id, label, detail: `Dropped pin · ${dist}m`, dir, distance: dist, icon: "📍", accessible: true, custom: true };
+    setCustomPins((w) => [...w, pin]);
     setDestId(id);
     if (voiceOn) speak(`New waypoint dropped. Navigating.`, lang.voice);
   };
 
   const removePin = () => {
     if (!dest.custom) return;
-    setWaypoints((w) => w.filter((x) => x.id !== dest.id));
-    setDestId(DEFAULT_WAYPOINTS[0].id);
+    setCustomPins((w) => w.filter((x) => x.id !== dest.id));
+    setDestId(venue.zones[0].id);
   };
+
+  // Emergency: fastest exit + medical
+  const panic = () => {
+    const exit = waypoints.find((w) => w.id === "exit") ?? waypoints[0];
+    setDestId(exit.id);
+    speak(`Emergency mode. Guiding you to ${exit.label}. Stay calm and follow the arrow.`, lang.voice);
+  };
+
 
   // Arrow rotates by dir minus heading offset (0° = north)
   const arrowRotation = dest.dir - (heading - 12);
