@@ -110,13 +110,14 @@ function Landing() {
 
         <div className="mt-12 flex flex-col items-center gap-4"
           style={{ opacity: stage >= 4 ? 1 : 0, transform: stage >= 4 ? "translateY(0)" : "translateY(20px)", transition: "all 800ms cubic-bezier(0.22, 1, 0.36, 1) 600ms" }}>
-          <button onClick={enter}
-            className="group relative px-10 py-4 bg-neon-cyan text-black font-display tracking-[0.3em] text-lg rounded shadow-[0_0_40px_rgba(34,211,238,0.5)] hover:shadow-[0_0_60px_rgba(34,211,238,0.8)] transition-all hover:scale-105">
+          <Magnetic onClick={enter}
+            className="group relative px-10 py-4 bg-neon-cyan text-black font-display tracking-[0.3em] text-lg rounded shadow-[0_0_40px_rgba(34,211,238,0.5)] hover:shadow-[0_0_60px_rgba(34,211,238,0.8)]">
             {hasPassport ? "ENTER STADIUM" : "MINT FAN PASSPORT"}
             <span className="ml-3 inline-block group-hover:translate-x-1 transition-transform">→</span>
-          </button>
+          </Magnetic>
           <div className="flex gap-6 font-mono text-[10px] uppercase tracking-widest text-white/40">
             <button onClick={() => navigate({ to: "/dashboard" })} className="hover:text-neon-cyan transition">[ SKIP TO DASHBOARD ]</button>
+            <button onClick={() => navigate({ to: "/ar" })} className="hover:text-neon-cyan transition">[ AR WAYFINDING ]</button>
             <span className="text-neon-cyan">System Ready</span>
           </div>
         </div>
@@ -134,10 +135,59 @@ function Landing() {
       <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-neon-cyan to-transparent pointer-events-none opacity-40"
         style={{ animation: "scanline-y 6s linear infinite" }} />
 
+      <div className="absolute bottom-6 inset-x-0 text-center font-mono text-[10px] tracking-[0.4em] text-white/35 animate-pulse">
+        SCROLL FOR SYSTEM TELEMETRY ↓
+      </div>
+      </div>
+
+      {/* Scroll-triggered telemetry deck */}
+      <section className="relative py-24 px-6">
+        <AnimatedGrid opacity={0.3} />
+        <ParticleField count={45} link={false} />
+        <div className="relative max-w-5xl mx-auto">
+          <h2 className="font-display text-4xl tracking-[0.2em] text-center text-white/90">SYSTEM <span className="text-neon-cyan">INDEX</span></h2>
+          <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.35em] text-white/40">Live knowledge graph loaded on boot</p>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { label: "Venues mapped", value: STADIUMS.length, suffix: "", note: "AR waypoint graphs" },
+              { label: "Nations", value: ALL_TEAMS.length, suffix: "", note: "Official FIFA squads" },
+              { label: "Players indexed", value: allPlayers().length, suffix: "", note: "Portraits + stats" },
+              { label: "Edge sensors", value: 12480, suffix: "", note: "Streaming at 60 Hz" },
+            ].map((s, i) => (
+              <HoloPanel key={s.label} delay={i * 120} className="p-5">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-white/40">{s.label}</div>
+                <div className="font-display text-4xl text-neon-cyan mt-1">
+                  <CountUp to={s.value} suffix={s.suffix} />
+                </div>
+                <div className="text-[11px] text-white/50 mt-1">{s.note}</div>
+              </HoloPanel>
+            ))}
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              { t: "AR WAYFINDING", d: `Indoor waypoint graphs for all ${STADIUMS.length} venues — seats, step-free lifts, medical, transit.`, to: "/ar" as const, icon: "🧭" },
+              { t: "MISSION CONTROL", d: "3D digital twin, predictive crowd intelligence, and a voice GenAI copilot.", to: "/dashboard" as const, icon: "🛰" },
+              { t: "HIGHLIGHT REEL", d: "One-click cinematic recap with funk score, your team, and your hero player.", to: "/reel" as const, icon: "🎬" },
+            ].map((c, i) => (
+              <HoloPanel key={c.t} delay={i * 140} className="p-6">
+                <div className="text-3xl">{c.icon}</div>
+                <div className="font-display text-2xl tracking-widest text-white mt-2">{c.t}</div>
+                <p className="text-sm text-white/55 mt-2">{c.d}</p>
+                <Magnetic strength={10} onClick={() => navigate({ to: c.to })}
+                  className="mt-4 px-4 py-2 rounded border border-neon-cyan/50 text-neon-cyan font-mono text-[10px] tracking-widest hover:bg-neon-cyan/10">
+                  OPEN →
+                </Magnetic>
+              </HoloPanel>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <style>{`
         @keyframes floodlight-in { from { opacity: 0; height: 0; } to { opacity: 1; height: 50%; } }
         @keyframes scanline-y { 0% { transform: translateY(-20vh); } 100% { transform: translateY(120vh); } }
       `}</style>
+
     </div>
   );
 }
