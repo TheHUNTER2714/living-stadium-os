@@ -245,12 +245,19 @@ function AR() {
             <button onClick={dropPin}
               className="size-11 rounded-full bg-black/60 backdrop-blur border border-white/20 text-white/70 font-mono text-lg hover:border-neon-cyan"
               title="Drop waypoint">📍</button>
+            <button onClick={() => setStepFreeOnly((v) => !v)}
+              className={`size-11 rounded-full backdrop-blur border font-mono text-lg ${stepFreeOnly ? "bg-neon-green/20 border-neon-green text-neon-green" : "bg-black/60 border-white/20 text-white/60"}`}
+              title="Step-free routes only">♿</button>
+            <button onClick={panic}
+              className="size-11 rounded-full bg-neon-alert/20 backdrop-blur border border-neon-alert text-neon-alert font-mono text-sm animate-pulse"
+              title="Emergency exit routing">SOS</button>
             {dest.custom && (
               <button onClick={removePin}
                 className="size-11 rounded-full bg-neon-alert/20 backdrop-blur border border-neon-alert text-neon-alert font-mono text-lg"
                 title="Remove pin">✕</button>
             )}
           </div>
+
         </div>
       )}
 
