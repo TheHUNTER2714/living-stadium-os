@@ -45,8 +45,11 @@ FW: ${by("FW")}`;
 /** Returns a data-grounded answer, or null when the question isn't about WC26 squads. */
 export function answerFromData(q: string): string | null {
   const n = norm(q);
+  const venue = stadiumAnswer(q);
+  if (venue) return venue;
   const player = findPlayer(q);
   const team = findTeam(q);
+
 
   if (player && !/squad|roster|lineup|team list|players of/.test(n)) {
     const age = player.birth ? Math.floor((Date.now() - new Date(player.birth).getTime()) / 3.15576e10) : null;
