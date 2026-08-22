@@ -8,6 +8,7 @@ import { answerFromData } from "@/lib/wc-knowledge";
 import { COPILOT, LANGUAGES, classifyIntent, type LangCode } from "@/data/i18n";
 import { createPTT, speak, cancelSpeech } from "@/lib/voice";
 import { RobotMascot, type RobotEmotion } from "@/components/RobotMascot";
+import { CursorSpotlight, AnimatedGrid, ParticleField } from "@/components/fx";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Mission Control · StadiumOS AI" }] }),
